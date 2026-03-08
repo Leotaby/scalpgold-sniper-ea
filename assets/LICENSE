@@ -1,0 +1,22 @@
+ScalpGold Sniper EA — Proprietary License
+
+Copyright (c) 2026 Hatef Tabbakhian. All rights reserved.
+
+This repository contains documentation, architecture descriptions, and
+educational materials related to the ScalpGold Sniper Expert Advisor.
+
+PERMITTED:
+- Reading and sharing the documentation in this repository
+- Referencing the strategy architecture for educational purposes
+- Linking to this repository
+
+NOT PERMITTED:
+- Reproducing, reverse-engineering, or re-implementing the strategy
+  as a competing commercial product
+- Distributing or reselling the compiled EA files
+- Claiming authorship of the strategy design
+
+The compiled Expert Advisor (.ex5) is distributed exclusively through
+MQL5 Market under a separate End User License Agreement (EULA).
+
+For licensing inquiries: github.com/Leotaby

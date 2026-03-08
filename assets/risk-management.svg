@@ -1,0 +1,63 @@
+<svg width="900" height="130" viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#07080e"/>
+      <stop offset="100%" style="stop-color:#0c0e1a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="130" fill="url(#bg5)" rx="10"/>
+  <rect width="900" height="130" fill="none" stroke="#1a1e2e" stroke-width="1" rx="10"/>
+
+  <!-- 6 cells -->
+  <!-- Cell width = (900 - 2*10 - 5*8) / 6 = (880-40)/6 = 140 -->
+
+  <!-- Cell 1 -->
+  <rect x="10"  y="10" width="138" height="110" rx="4" fill="#0c0e18" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="79"  y="52"  text-anchor="middle" font-family="monospace" font-size="26" font-weight="bold" fill="#E8B84B">0.75%</text>
+  <text x="79"  y="70"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#4a5568" letter-spacing="2">RISK PER TRADE</text>
+  <line x1="20" y1="80" x2="138" y2="80" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="79"  y="96"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">Equity-based</text>
+  <text x="79"  y="110" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">dynamic sizing</text>
+
+  <!-- Cell 2 -->
+  <rect x="156" y="10" width="138" height="110" rx="4" fill="#0c0e18" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="225" y="52"  text-anchor="middle" font-family="monospace" font-size="26" font-weight="bold" fill="#f43f5e">3.0%</text>
+  <text x="225" y="70"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#4a5568" letter-spacing="2">DAILY DD HALT</text>
+  <line x1="166" y1="80" x2="284" y2="80" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="225" y="96"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">Stops new entries</text>
+  <text x="225" y="110" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">until next day</text>
+
+  <!-- Cell 3 -->
+  <rect x="302" y="10" width="138" height="110" rx="4" fill="#0c0e18" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="371" y="52"  text-anchor="middle" font-family="monospace" font-size="26" font-weight="bold" fill="#38bdf8">2</text>
+  <text x="371" y="70"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#4a5568" letter-spacing="2">MAX POSITIONS</text>
+  <line x1="312" y1="80" x2="430" y2="80" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="371" y="96"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">Simultaneous</text>
+  <text x="371" y="110" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">open trades cap</text>
+
+  <!-- Cell 4 -->
+  <rect x="448" y="10" width="138" height="110" rx="4" fill="#0c0e18" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="517" y="52"  text-anchor="middle" font-family="monospace" font-size="26" font-weight="bold" fill="#a78bfa">5</text>
+  <text x="517" y="70"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#4a5568" letter-spacing="2">CONSEC. LOSS HALT</text>
+  <line x1="458" y1="80" x2="576" y2="80" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="517" y="96"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">Streak halt</text>
+  <text x="517" y="110" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">manual review</text>
+
+  <!-- Cell 5 -->
+  <rect x="594" y="10" width="138" height="110" rx="4" fill="#0c0e18" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="663" y="52"  text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#22c55e">08–17</text>
+  <text x="663" y="64"  text-anchor="middle" font-family="monospace" font-size="10" fill="#22c55e">GMT</text>
+  <text x="663" y="78"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#4a5568" letter-spacing="2">SESSION WINDOW</text>
+  <line x1="604" y1="84" x2="722" y2="84" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="663" y="100" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">London + NY</text>
+  <text x="663" y="114" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">overlap only</text>
+
+  <!-- Cell 6 -->
+  <rect x="740" y="10" width="150" height="110" rx="4" fill="#0c0e18" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="815" y="52"  text-anchor="middle" font-family="monospace" font-size="26" font-weight="bold" fill="#E8B84B">4H</text>
+  <text x="815" y="70"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#4a5568" letter-spacing="2">MAX HOLD TIME</text>
+  <line x1="750" y1="80" x2="880" y2="80" stroke="#1a1e2e" stroke-width="1"/>
+  <text x="815" y="96"  text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">Force-close if</text>
+  <text x="815" y="110" text-anchor="middle" font-family="monospace" font-size="8"  fill="#2a3040">TP/SL not hit</text>
+</svg>
