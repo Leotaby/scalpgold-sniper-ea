@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScalpGold Sniper EA — Live 3D Visualization</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --gold: #E8B84B;
+  --gold2: #f5d07a;
+  --gold-dim: #7a5c1a;
+  --bg: #04050a;
+  --panel: rgba(10,12,22,0.92);
+  --panel2: rgba(14,16,28,0.95);
+  --border: rgba(232,184,75,0.12);
+  --border2: rgba(232,184,75,0.25);
+  --green: #00ff88;
+  --red: #ff3060;
+  --blue: #00c8ff;
+  --purple: #b87fff;
+  --text: #8a9bbf;
+  --bright: #dde8ff;
+  --glow-gold: 0 0 20px rgba(232,184,75,0.4), 0 0 60px rgba(232,184,75,0.1);
+  --glow-green: 0 0 15px rgba(0,255,136,0.5);
+  --glow-red: 0 0 15px rgba(255,48,96,0.5);
+  --glow-blue: 0 0 15px rgba(0,200,255,0.5);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════
+   CANVAS BACKGROUND
+═══════════════════════════════════════════ */
+#canvas-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════
+   SCANLINE OVERLAY
+═══════════════════════════════════════════ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(4,5,10,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-brand {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 4px;
+  text-shadow: var(--glow-gold);
+}
+.nav-brand span { color: #fff; }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--gold); }
+
+.nav-cta {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--bg);
+  background: var(--gold);
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.nav-cta:hover {
+  background: var(--gold2);
+  box-shadow: var(--glow-gold);
+}
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 48px 60px;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.3s forwards;
+}
+
+.hero-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 0.9;
+  text-align: center;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.5s forwards;
+}
+.hero-title .line1 { color: #fff; display: block; }
+.hero-title .line2 {
+  color: var(--gold);
+  display: block;
+  text-shadow: var(--glow-gold);
+}
+.hero-title .line3 {
+  color: rgba(255,255,255,0.15);
+  display: block;
+  font-size: 0.45em;
+  letter-spacing: 12px;
+}
+
+.hero-sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-align: center;
+  line-height: 2;
+  margin-bottom: 48px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.7s forwards;
+}
+
+/* LIVE STATS ROW */
+.hero-stats {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border2);
+  margin-bottom: 60px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.9s forwards;
+}
+.hstat {
+  padding: 20px 32px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+  position: relative;
+}
+.hstat:last-child { border-right: none; }
+.hstat-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+.hstat-lbl {
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════
+   3D CHART SECTION
+═══════════════════════════════════════════ */
+#chart-section {
+  width: 100%;
+  padding: 80px 48px;
+  position: relative;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.section-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 3px;
+}
+.section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bright);
+  letter-spacing: 4px;
+}
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+
+/* The 3D chart canvas wrapper */
+.chart-3d-wrap {
+  width: 100%;
+  height: 480px;
+  position: relative;
+  border: 1px solid var(--border);
+  background: rgba(4,5,10,0.6);
+  overflow: hidden;
+}
+#chart3d { width: 100%; height: 100%; display: block; }
+
+.chart-overlay-labels {
+  position: absolute;
+  top: 16px; left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chart-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  border-left: 2px solid;
+}
+.cl-lwma  { border-color: var(--blue);   color: var(--blue);   background: rgba(0,200,255,0.08); }
+.cl-bb    { border-color: var(--gold);   color: var(--gold);   background: rgba(232,184,75,0.08); }
+.cl-buy   { border-color: var(--green);  color: var(--green);  background: rgba(0,255,136,0.08); }
+.cl-sell  { border-color: var(--red);    color: var(--red);    background: rgba(255,48,96,0.08); }
+.cl-trail { border-color: var(--purple); color: var(--purple); background: rgba(184,127,255,0.08); }
+
+.chart-ticker {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-shadow: var(--glow-gold);
+}
+.chart-price {
+  font-size: 24px;
+  font-weight: 700;
+  display: block;
+  text-align: right;
+}
+.chart-change {
+  font-size: 10px;
+  text-align: right;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   SIGNAL PIPELINE — 3D CSS
+═══════════════════════════════════════════ */
+#pipeline-section {
+  padding: 80px 48px;
+}
+
+.pipeline-3d {
+  perspective: 1200px;
+  padding: 40px 0;
+}
+
+.pipeline-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transform-style: preserve-3d;
+}
+
+.pipe-card {
+  flex: 1;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: 32px 24px;
+  position: relative;
+  transform: rotateY(0deg) translateZ(0);
+  transition: transform 0.4s ease, border-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  overflow: hidden;
+}
+.pipe-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.pipe-card:hover {
+  transform: translateY(-8px) translateZ(30px) scale(1.02);
+  border-color: var(--border2);
+}
+
+.pc1::before { background: var(--blue); }
+.pc2::before { background: var(--gold); }
+.pc3::before { background: var(--purple); }
+.pc4::before { background: var(--green); }
+
+.pc1:hover { box-shadow: 0 20px 60px rgba(0,200,255,0.15), var(--glow-blue); }
+.pc2:hover { box-shadow: 0 20px 60px rgba(232,184,75,0.15), var(--glow-gold); }
+.pc3:hover { box-shadow: 0 20px 60px rgba(184,127,255,0.15); }
+.pc4:hover { box-shadow: 0 20px 60px rgba(0,255,136,0.15), var(--glow-green); }
+
+.pipe-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 52px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  position: absolute;
+  bottom: -8px; right: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pipe-icon { font-size: 24px; margin-bottom: 12px; }
+.pipe-layer {
+  font-size: 9px;
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+}
+.pc1 .pipe-layer { color: var(--blue); }
+.pc2 .pipe-layer { color: var(--gold); }
+.pc3 .pipe-layer { color: var(--purple); }
+.pc4 .pipe-layer { color: var(--green); }
+
+.pipe-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bright);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.pipe-desc {
+  font-size: 10px;
+  color: var(--text);
+  line-height: 1.8;
+}
+.pipe-param {
+  margin-top: 12px;
+  font-size: 9px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  padding: 6px 10px;
+  background: rgba(232,184,75,0.05);
+  border-left: 2px solid var(--gold-dim);
+}
+
+.pipe-arrow {
+  width: 48px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.arrow-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  position: relative;
+}
+.arrow-line::after {
+  content: '›';
+  position: absolute;
+  right: -4px;
+  top: -8px;
+  color: var(--gold);
+  font-size: 16px;
+}
+.arrow-pulse {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: var(--glow-gold);
+  animation: pulseDot 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   LIVE INDICATOR GAUGES
+═══════════════════════════════════════════ */
+#indicators-section {
+  padding: 80px 48px;
+}
+
+.ind-grid-3d {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  perspective: 800px;
+}
+
+.ind-panel {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s;
+  transform-origin: center bottom;
+}
+.ind-panel:hover {
+  transform: rotateX(-3deg) translateY(-4px);
+}
+.ind-panel::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+}
+.ip-blue::before   { background: var(--blue); }
+.ip-gold::before   { background: var(--gold); }
+.ip-cyan::before   { background: #00e5c8; }
+.ip-purple::before { background: var(--purple); }
+.ip-green::before  { background: var(--green); }
+.ip-red::before    { background: var(--red); }
+
+.ind-panel-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-bottom: 4px;
+}
+.ip-blue   .ind-panel-name { color: var(--blue); }
+.ip-gold   .ind-panel-name { color: var(--gold); }
+.ip-cyan   .ind-panel-name { color: #00e5c8; }
+.ip-purple .ind-panel-name { color: var(--purple); }
+.ip-green  .ind-panel-name { color: var(--green); }
+.ip-red    .ind-panel-name { color: var(--red); }
+
+.ind-panel-param {
+  font-size: 9px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+/* Gauge arc */
+.gauge-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.gauge-svg { width: 100px; height: 60px; display: block; overflow: visible; }
+
+.ind-bar-wrap {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.ind-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 2s ease;
+}
+
+.ind-panel-role {
+  font-size: 9px;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+/* ═══════════════════════════════════════════
+   EXIT SYSTEM — ANIMATED
+═══════════════════════════════════════════ */
+#exit-section {
+  padding: 80px 48px;
+}
+
+.exit-canvas-wrap {
+  width: 100%;
+  height: 350px;
+  position: relative;
+  border: 1px solid var(--border);
+  background: rgba(4,5,10,0.8);
+  overflow: hidden;
+}
+#exitCanvas { width: 100%; height: 100%; display: block; }
+
+.exit-legend {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+.exit-leg {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: 16px;
+  text-align: center;
+}
+.exit-leg-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 4px;
+}
+.exit-leg-unit { font-size: 8px; color: var(--gold-dim); letter-spacing: 2px; display: block; margin-bottom: 6px; }
+.exit-leg-lbl  { font-size: 9px; color: var(--text); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════
+   RISK DASHBOARD
+═══════════════════════════════════════════ */
+#risk-section {
+  padding: 80px 48px;
+}
+
+.risk-hud {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.risk-main {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: 32px;
+}
+.risk-grid-cells {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.risk-cell {
+  background: rgba(4,5,10,0.8);
+  border: 1px solid var(--border);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.risk-cell:hover { border-color: var(--border2); }
+.risk-cell::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+  opacity: 0.4;
+}
+.risk-cell-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: var(--glow-gold);
+}
+.risk-cell-lbl { font-size: 9px; color: var(--text); letter-spacing: 2px; }
+.risk-cell-note { font-size: 8px; color: var(--gold-dim); }
+
+.risk-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.risk-side-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: 24px;
+  flex: 1;
+}
+.rsc-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+/* Session bar */
+.session-bar {
+  height: 20px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.session-seg {
+  position: absolute;
+  top: 0; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+.ss-active {
+  left: 33.3%; width: 37.5%;
+  background: rgba(0,255,136,0.2);
+  color: var(--green);
+}
+.ss-closed-l { left: 0; width: 33.3%; color: rgba(255,255,255,0.15); }
+.ss-closed-r { left: 70.8%; width: 29.2%; color: rgba(255,255,255,0.15); }
+.session-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════
+   ACADEMIC SECTION
+═══════════════════════════════════════════ */
+#academic-section {
+  padding: 80px 48px;
+}
+
+.academic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.paper-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.paper-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--border2);
+}
+.paper-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(232,184,75,0.05), transparent 70%);
+}
+
+.paper-author {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.paper-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bright);
+  margin-bottom: 12px;
+  line-height: 1.5;
+  letter-spacing: 1px;
+}
+.paper-body {
+  font-size: 10px;
+  color: var(--text);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.paper-stat-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--green);
+  text-shadow: var(--glow-green);
+  display: block;
+}
+.paper-stat-lbl {
+  font-size: 8px;
+  color: var(--text);
+  letter-spacing: 2px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 60px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer-brand {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: var(--glow-gold);
+  letter-spacing: 4px;
+}
+.footer-brand span { color: #fff; }
+.footer-info { font-size: 9px; color: var(--gold-dim); letter-spacing: 2px; line-height: 2; text-align: right; }
+.footer-cta {
+  display: inline-block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--bg);
+  background: var(--gold);
+  padding: 14px 28px;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+.footer-cta:hover { background: var(--gold2); box-shadow: var(--glow-gold); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes pulseDot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%     { opacity:0.3; transform:scale(0.6); }
+}
+@keyframes tickerScroll {
+  0%   { opacity:0.7; }
+  50%  { opacity:1; }
+  100% { opacity:0.7; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ═══════════════════════════════════════════
+   CODE VISUALIZATION
+═══════════════════════════════════════════ */
+#code-section { padding: 80px 48px; }
+
+.code-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.code-window {
+  background: #080b12;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  position: relative;
+}
+
+.code-titlebar {
+  background: #0d1020;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cd-red    { background: #ff5f57; }
+.cd-yellow { background: #febc2e; }
+.cd-green  { background: #28c840; }
+.code-filename {
+  font-size: 10px;
+  color: var(--text);
+  letter-spacing: 2px;
+  margin-left: 8px;
+  flex: 1;
+}
+.code-badge {
+  font-size: 8px;
+  color: var(--gold);
+  background: rgba(232,184,75,0.1);
+  border: 1px solid rgba(232,184,75,0.2);
+  padding: 2px 8px;
+  letter-spacing: 1px;
+}
+
+.code-body {
+  padding: 20px 0 20px 0;
+  overflow: hidden;
+  position: relative;
+  min-height: 320px;
+}
+
+/* Line numbers + code lines */
+.code-line {
+  display: flex;
+  align-items: baseline;
+  padding: 0 20px 0 0;
+  position: relative;
+  transition: background 0.15s;
+}
+.code-line:hover { background: rgba(232,184,75,0.03); }
+.code-line.highlighted { background: rgba(232,184,75,0.06); }
+
+.ln {
+  min-width: 36px;
+  text-align: right;
+  padding-right: 16px;
+  color: #2a3050;
+  font-size: 10px;
+  user-select: none;
+  flex-shrink: 0;
+  border-right: 1px solid #0f1225;
+  margin-right: 16px;
+}
+
+/* Syntax colours */
+.kw    { color: #7ec8e3; }   /* keyword */
+.fn    { color: #88d4ab; }   /* function */
+.typ   { color: #c792ea; }   /* type */
+.str   { color: #f5a97f; }   /* string */
+.num   { color: #f5c842; }   /* number */
+.cmt   { color: #3a4a60; font-style: italic; } /* comment */
+.var   { color: #dde4f5; }   /* variable */
+.op    { color: #E8B84B; }   /* operator */
+.punc  { color: #5a6a8a; }   /* punctuation */
+.const { color: #a78bfa; }   /* constant */
+.gold-hl { color: var(--gold); font-weight: 500; }
+
+/* Typing cursor */
+.cursor {
+  display: inline-block;
+  width: 2px; height: 12px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-left: 1px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Animated line highlight sweep */
+@keyframes lineReveal {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.code-line { opacity: 0; animation: lineReveal 0.15s ease forwards; }
+
+/* Scrolling code animation */
+.code-scroll-wrap {
+  overflow: hidden;
+  height: 320px;
+  position: relative;
+}
+.code-scroll-inner {
+  position: absolute;
+  width: 100%;
+  animation: codeScroll 20s linear infinite;
+}
+@keyframes codeScroll {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.code-scroll-inner:hover { animation-play-state: paused; }
+
+/* Fade mask top/bottom */
+.code-scroll-wrap::before,
+.code-scroll-wrap::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 40px;
+  pointer-events: none;
+  z-index: 2;
+}
+.code-scroll-wrap::before { top: 0; background: linear-gradient(to bottom, #080b12, transparent); }
+.code-scroll-wrap::after  { bottom: 0; background: linear-gradient(to top, #080b12, transparent); }
+
+/* Right panel: logic explainer */
+.logic-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.logic-block {
+  background: #080b12;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.logic-block:hover {
+  border-color: rgba(232,184,75,0.3);
+  transform: translateX(4px);
+}
+.logic-block::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.lb-blue::before   { background: var(--blue); }
+.lb-gold::before   { background: var(--gold); }
+.lb-purple::before { background: var(--purple); }
+.lb-green::before  { background: var(--green); }
+.lb-red::before    { background: var(--red); }
+
+.lb-tag {
+  font-size: 8px;
+  letter-spacing: 3px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.lb-blue   .lb-tag { color: var(--blue); }
+.lb-gold   .lb-tag { color: var(--gold); }
+.lb-purple .lb-tag { color: var(--purple); }
+.lb-green  .lb-tag { color: var(--green); }
+.lb-red    .lb-tag { color: var(--red); }
+
+.lb-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bright);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.lb-desc  { font-size: 10px; color: var(--text); line-height: 1.7; }
+.lb-code  {
+  margin-top: 8px;
+  font-size: 10px;
+  background: rgba(0,0,0,0.4);
+  border-left: 2px solid rgba(255,255,255,0.06);
+  padding: 6px 10px;
+  color: #4a5a78;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* copyright strip */
+.copyright-strip {
+  text-align: center;
+  padding: 16px;
+  font-size: 9px;
+  color: #1e2535;
+  letter-spacing: 2px;
+  border-top: 1px solid #0a0c14;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: var(--glow-green);
+  animation: pulseDot 1.2s ease-in-out infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<div class="page-content">
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">SCALP<span>GOLD</span></div>
+  <ul class="nav-links">
+    <li><a href="#chart-section">Chart</a></li>
+    <li><a href="#pipeline-section">Signal</a></li>
+    <li><a href="#code-section">Code</a></li>
+    <li><a href="#indicators-section">Indicators</a></li>
+    <li><a href="#exit-section">Exits</a></li>
+    <li><a href="#risk-section">Risk</a></li>
+    <li><a href="#academic-section">Research</a></li>
+  </ul>
+  <a class="nav-cta" href="https://www.mql5.com/en/market/product/168064" target="_blank">GET EA →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow"><span class="live-dot"></span> MT5 Expert Advisor · XAUUSD · M5 · v5.0</div>
+  <h1 class="hero-title">
+    <span class="line1">SCALP</span>
+    <span class="line2">GOLD</span>
+    <span class="line3">SNIPER EA</span>
+  </h1>
+  <p class="hero-sub">
+    Evidence-Based Gold Scalping &nbsp;·&nbsp; LWMA + Stochastic + BB + RSI<br>
+    ATR-Adaptive Exits &nbsp;·&nbsp; Built on Peer-Reviewed Research
+  </p>
+  <div class="hero-stats">
+    <div class="hstat">
+      <span class="hstat-val" style="color:var(--blue)">M5</span>
+      <span class="hstat-lbl">Timeframe</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-val" style="color:var(--gold)">XAUUSD</span>
+      <span class="hstat-lbl">Instrument</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-val" style="color:var(--green)">0.75%</span>
+      <span class="hstat-lbl">Risk/Trade</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-val" style="color:var(--purple)">1:1.67</span>
+      <span class="hstat-lbl">Risk/Reward</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-val" style="color:var(--red)">3%</span>
+      <span class="hstat-lbl">Daily DD Limit</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-val" style="color:var(--gold)">$49</span>
+      <span class="hstat-lbl">Intro Price</span>
+    </div>
+  </div>
+</section>
+
+<!-- 3D CHART -->
+<section id="chart-section">
+  <div class="section-header reveal">
+    <span class="section-num">01 /</span>
+    <span class="section-title">LIVE SIGNAL CHART</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="chart-3d-wrap reveal">
+    <canvas id="chart3d"></canvas>
+    <div class="chart-overlay-labels">
+      <div class="chart-label cl-lwma">LWMA (20)</div>
+      <div class="chart-label cl-bb">Bollinger Bands</div>
+      <div class="chart-label cl-buy">▲ Buy Signal</div>
+      <div class="chart-label cl-sell">▼ Sell Signal</div>
+      <div class="chart-label cl-trail">Trailing Stop</div>
+    </div>
+    <div class="chart-ticker">
+      XAUUSD
+      <span class="chart-price" id="livePrice">3 082.45</span>
+      <span class="chart-change" id="liveChange" style="color:var(--green)">+0.24%</span>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNAL PIPELINE -->
+<section id="pipeline-section">
+  <div class="section-header reveal">
+    <span class="section-num">02 /</span>
+    <span class="section-title">SIGNAL GENERATION PIPELINE</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="pipeline-3d">
+    <div class="pipeline-row">
+      <div class="pipe-card pc1 reveal reveal-delay-1">
+        <div class="pipe-num">01</div>
+        <div class="pipe-icon">📡</div>
+        <div class="pipe-layer">LAYER 1 — TREND</div>
+        <div class="pipe-title">M15 FILTER</div>
+        <div class="pipe-desc">LWMA(20) slope on M15 confirms the macro direction. Counter-trend signals are blocked entirely before reaching Layer 2.</div>
+        <div class="pipe-param">M5 Close &gt; LWMA · M15 slope rising</div>
+      </div>
+      <div class="pipe-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-pulse"></div>
+      </div>
+      <div class="pipe-card pc2 reveal reveal-delay-2">
+        <div class="pipe-num">02</div>
+        <div class="pipe-icon">⚡</div>
+        <div class="pipe-layer">LAYER 2 — TRIGGER</div>
+        <div class="pipe-title">STOCHASTIC</div>
+        <div class="pipe-desc">%K crosses above %D from below 30 (buy) or crosses below %D from above 70 (sell). Mid-range crossovers are discarded.</div>
+        <div class="pipe-param">Stoch(14,3,3) · Extreme zones only</div>
+      </div>
+      <div class="pipe-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-pulse" style="animation-delay:0.5s"></div>
+      </div>
+      <div class="pipe-card pc3 reveal reveal-delay-3">
+        <div class="pipe-num">03</div>
+        <div class="pipe-icon">🎯</div>
+        <div class="pipe-layer">LAYER 3 — CONFIRM ★</div>
+        <div class="pipe-title">BB + RSI</div>
+        <div class="pipe-desc">Price at Bollinger Band edge AND RSI in extreme zone. When both fire, signal upgrades to HIGH CONFIDENCE with +25% lot.</div>
+        <div class="pipe-param">BB(20,2) band touch · RSI &lt; 35 or &gt; 65</div>
+      </div>
+      <div class="pipe-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-pulse" style="animation-delay:1s"></div>
+      </div>
+      <div class="pipe-card pc4 reveal reveal-delay-4">
+        <div class="pipe-num">04</div>
+        <div class="pipe-icon">✅</div>
+        <div class="pipe-layer">EXECUTE</div>
+        <div class="pipe-title">ORDER SENT</div>
+        <div class="pipe-desc">Margin verified. Spread checked (&lt;35pts). Session confirmed (08–17 GMT). ATR-based SL/TP calculated. Position opened.</div>
+        <div class="pipe-param">ATR SL=1.5× · TP=2.5× · Risk 0.75%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE VISUALIZATION -->
+<section id="code-section">
+  <div class="section-header reveal">
+    <span class="section-num">03 /</span>
+    <span class="section-title">UNDER THE HOOD</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="code-layout">
+
+    <!-- LEFT: Scrolling MQL5 code window -->
+    <div class="code-window reveal">
+      <div class="code-titlebar">
+        <div class="code-dot cd-red"></div>
+        <div class="code-dot cd-yellow"></div>
+        <div class="code-dot cd-green"></div>
+        <span class="code-filename">ScalpGold_EA.mq5</span>
+        <span class="code-badge">MQL5 · v5.0</span>
+      </div>
+      <div class="code-body">
+        <div class="code-scroll-wrap">
+          <div class="code-scroll-inner" id="codeScroll">
+            <!-- Block will be filled by JS -->
+          </div>
+        </div>
+      </div>
+      <div class="copyright-strip">© 2026 Hatef Tabbakhian (LEO) · Proprietary · All rights reserved</div>
+    </div>
+
+    <!-- RIGHT: Logic explainer blocks -->
+    <div class="logic-panel reveal reveal-delay-2">
+
+      <div class="logic-block lb-blue">
+        <div class="lb-tag">Signal Layer 1</div>
+        <div class="lb-title">TREND GATE</div>
+        <div class="lb-desc">LWMA(20) on M5 and M15. Both must agree with the intended trade direction before the signal pipeline continues.</div>
+        <div class="lb-code"><span class="kw">if</span>(<span class="var">close</span> <span class="op">&gt;</span> <span class="fn">iMA</span>(<span class="punc">_Symbol,PERIOD_M5,20,0,MODE_LWMA,PRICE_CLOSE,1</span>)<br>&nbsp;&nbsp;&amp;&amp; <span class="fn">m15slope</span>() <span class="op">==</span> <span class="const">TREND_UP</span>) <span class="punc">{</span></div>
+      </div>
+
+      <div class="logic-block lb-gold">
+        <div class="lb-tag">Signal Layer 2</div>
+        <div class="lb-title">STOCHASTIC TRIGGER</div>
+        <div class="lb-desc">%K crosses above %D only from below 30. Mid-range crossovers are rejected entirely — this is the key insight from the academic literature.</div>
+        <div class="lb-code"><span class="kw">bool</span> <span class="var">crossUp</span> <span class="op">=</span> <span class="var">K_prev</span> <span class="op">&lt;</span> <span class="var">D_prev</span><br>&nbsp;&nbsp;&amp;&amp; <span class="var">K_cur</span> <span class="op">&gt;=</span> <span class="var">D_cur</span> &amp;&amp; <span class="var">K_cur</span> <span class="op">&lt;</span> <span class="num">30</span><span class="punc">;</span></div>
+      </div>
+
+      <div class="logic-block lb-purple">
+        <div class="lb-tag">Signal Layer 3</div>
+        <div class="lb-title">BB + RSI UPGRADE</div>
+        <div class="lb-desc">When price touches the lower Bollinger Band AND RSI is below 35, signal strength upgrades. Position size increases by 25%.</div>
+        <div class="lb-code"><span class="kw">if</span>(<span class="var">close</span> <span class="op">&lt;=</span> <span class="var">bbLower</span> <span class="op">*</span> <span class="num">1.002</span><br>&nbsp;&nbsp;&amp;&amp; <span class="fn">iRSI</span>(<span class="punc">...</span>) <span class="op">&lt;</span> <span class="num">35</span>) <span class="var">strength</span> <span class="op">=</span> <span class="num">3</span><span class="punc">;</span></div>
+      </div>
+
+      <div class="logic-block lb-green">
+        <div class="lb-tag">Risk Engine</div>
+        <div class="lb-title">ATR-ADAPTIVE SIZING</div>
+        <div class="lb-desc">Stop loss and take profit dynamically computed from ATR(14). No fixed pip distances — every trade adapts to gold's current volatility regime.</div>
+        <div class="lb-code"><span class="var">sl</span> <span class="op">=</span> <span class="fn">atr</span> <span class="op">*</span> <span class="num">1.5</span><span class="punc">;</span> &nbsp;<span class="var">tp</span> <span class="op">=</span> <span class="fn">atr</span> <span class="op">*</span> <span class="num">2.5</span><span class="punc">;</span><br><span class="var">lot</span> <span class="op">=</span> (<span class="var">equity</span> <span class="op">*</span> <span class="num">0.0075</span>) <span class="op">/</span> (<span class="var">sl</span> <span class="op">/</span> <span class="var">tickSize</span> <span class="op">*</span> <span class="var">tickVal</span>)<span class="punc">;</span></div>
+      </div>
+
+      <div class="logic-block lb-red">
+        <div class="lb-tag">Protection</div>
+        <div class="lb-title">DAILY DD HALT</div>
+        <div class="lb-desc">If daily drawdown breaches 3%, the EA stops opening new positions until the next trading session begins. Non-negotiable.</div>
+        <div class="lb-code"><span class="kw">if</span>((<span class="var">g_dayStartEq</span> <span class="op">-</span> <span class="fn">AccountEquity</span>()) <span class="op">/</span> <span class="var">g_dayStartEq</span><br>&nbsp;&nbsp;<span class="op">&gt;</span> <span class="var">MaxDailyDD</span> <span class="op">/</span> <span class="num">100.0</span>) <span class="kw">return</span><span class="punc">;</span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<section id="indicators-section">
+  <div class="section-header reveal">
+    <span class="section-num">04 /</span>
+    <span class="section-title">INDICATOR STACK</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="ind-grid-3d">
+    <!-- LWMA -->
+    <div class="ind-panel ip-blue reveal reveal-delay-1">
+      <div class="ind-panel-name">LWMA</div>
+      <div class="ind-panel-param">Period 20 · M5 + M15</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 100 56">
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+          <path id="g-lwma" d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="var(--blue)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="40"/>
+          <text x="50" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--blue)">TREND</text>
+        </svg>
+      </div>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill" style="width:80%;background:var(--blue)"></div></div>
+      <div class="ind-panel-role">Linear-weighted MA. Heavier weight on recent price. Dual-TF trend confirmation. Core of the strategy.</div>
+    </div>
+    <!-- STOCH -->
+    <div class="ind-panel ip-gold reveal reveal-delay-2">
+      <div class="ind-panel-name">STOCHASTIC</div>
+      <div class="ind-panel-param">14 · 3 · 3 · STO_LOWHIGH</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 100 56">
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="60"/>
+          <text x="50" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--gold)">TRIGGER</text>
+        </svg>
+      </div>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill" style="width:65%;background:var(--gold)"></div></div>
+      <div class="ind-panel-role">Primary entry trigger. Crossover from extreme zone only. Eliminates mid-range noise entirely.</div>
+    </div>
+    <!-- BB -->
+    <div class="ind-panel ip-cyan reveal reveal-delay-3">
+      <div class="ind-panel-name">BOLL. BANDS</div>
+      <div class="ind-panel-param">Period 20 · Deviation 2.0</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 100 56">
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="#00e5c8" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="50"/>
+          <text x="50" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#00e5c8">CONFIRM</text>
+        </svg>
+      </div>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill" style="width:70%;background:#00e5c8"></div></div>
+      <div class="ind-panel-role">Volatility envelope. Edge touch = high-confidence entry. Midline = partial exit trigger.</div>
+    </div>
+    <!-- RSI -->
+    <div class="ind-panel ip-purple reveal reveal-delay-1">
+      <div class="ind-panel-name">RSI</div>
+      <div class="ind-panel-param">Period 14 · Levels 35 / 65</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 100 56">
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+          <path id="g-rsi" d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="var(--purple)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="75"/>
+          <text x="50" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--purple)">CONFIRM</text>
+        </svg>
+      </div>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill" style="width:55%;background:var(--purple)"></div></div>
+      <div class="ind-panel-role">Secondary confirmation paired with BB. Both extremes must fire to qualify strength-3 signal.</div>
+    </div>
+    <!-- ATR -->
+    <div class="ind-panel ip-green reveal reveal-delay-2">
+      <div class="ind-panel-name">ATR</div>
+      <div class="ind-panel-param">Period 14 · All exits</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 100 56">
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="var(--green)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="30"/>
+          <text x="50" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--green)">EXITS</text>
+        </svg>
+      </div>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill" style="width:90%;background:var(--green)"></div></div>
+      <div class="ind-panel-role">Volatility-adaptive exits. SL=1.5×ATR, TP=2.5×ATR. Trail at 1.0×ATR. No fixed pip values.</div>
+    </div>
+    <!-- SPREAD -->
+    <div class="ind-panel ip-red reveal reveal-delay-3">
+      <div class="ind-panel-name">SPREAD GATE</div>
+      <div class="ind-panel-param">Max 35 points · Hard gate</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 100 56">
+          <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+          <path id="g-spread" d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="var(--red)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="100"/>
+          <text x="50" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--red)">FILTER</text>
+        </svg>
+      </div>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill" style="width:25%;background:var(--red)"></div></div>
+      <div class="ind-panel-role">Blocks trading during news spikes, liquidity gaps. ECN/STP accounts recommended.</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXIT SYSTEM -->
+<section id="exit-section">
+  <div class="section-header reveal">
+    <span class="section-num">05 /</span>
+    <span class="section-title">EXIT SYSTEM</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="exit-canvas-wrap reveal">
+    <canvas id="exitCanvas"></canvas>
+  </div>
+  <div class="exit-legend reveal">
+    <div class="exit-leg">
+      <span class="exit-leg-val">1.5×</span>
+      <span class="exit-leg-unit">ATR · Stop Loss</span>
+      <span class="exit-leg-lbl">Adapts to gold's volatility — no fixed pips</span>
+    </div>
+    <div class="exit-leg">
+      <span class="exit-leg-val">2.5×</span>
+      <span class="exit-leg-unit">ATR · Take Profit</span>
+      <span class="exit-leg-lbl">1:1.67 R/R · Breakeven at 37.5% win rate</span>
+    </div>
+    <div class="exit-leg">
+      <span class="exit-leg-val">50%</span>
+      <span class="exit-leg-unit">Partial at BB Mid</span>
+      <span class="exit-leg-lbl">Early capture on mean reversion</span>
+    </div>
+    <div class="exit-leg">
+      <span class="exit-leg-val">4H</span>
+      <span class="exit-leg-unit">Max Hold Time</span>
+      <span class="exit-leg-lbl">Force-close if TP/SL not triggered</span>
+    </div>
+  </div>
+</section>
+
+<!-- RISK -->
+<section id="risk-section">
+  <div class="section-header reveal">
+    <span class="section-num">06 /</span>
+    <span class="section-title">RISK MANAGEMENT</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="risk-hud">
+    <div class="risk-main reveal">
+      <div style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold);letter-spacing:3px;margin-bottom:4px;">PROTECTION PARAMETERS</div>
+      <div style="font-size:9px;color:var(--text);">All parameters configurable · Defaults represent conservative live deployment</div>
+      <div class="risk-grid-cells">
+        <div class="risk-cell">
+          <span class="risk-cell-val">0.75%</span>
+          <span class="risk-cell-lbl">Risk / Trade</span>
+          <span class="risk-cell-note">Equity-based sizing</span>
+        </div>
+        <div class="risk-cell">
+          <span class="risk-cell-val" style="color:var(--red)">3.0%</span>
+          <span class="risk-cell-lbl">Daily DD Halt</span>
+          <span class="risk-cell-note">Stops entries until next day</span>
+        </div>
+        <div class="risk-cell">
+          <span class="risk-cell-val" style="color:var(--blue)">2</span>
+          <span class="risk-cell-lbl">Max Positions</span>
+          <span class="risk-cell-note">Simultaneous open cap</span>
+        </div>
+        <div class="risk-cell">
+          <span class="risk-cell-val" style="color:var(--purple)">5</span>
+          <span class="risk-cell-lbl">Loss Streak Halt</span>
+          <span class="risk-cell-note">Manual review required</span>
+        </div>
+        <div class="risk-cell">
+          <span class="risk-cell-val" style="color:var(--green)">5 bars</span>
+          <span class="risk-cell-lbl">Cooldown</span>
+          <span class="risk-cell-note">Min bars between trades</span>
+        </div>
+        <div class="risk-cell">
+          <span class="risk-cell-val">≤35</span>
+          <span class="risk-cell-lbl">Max Spread (pts)</span>
+          <span class="risk-cell-note">Hard gate — no exceptions</span>
+        </div>
+      </div>
+    </div>
+    <div class="risk-side">
+      <div class="risk-side-card reveal">
+        <div class="rsc-title">TRADING SESSION</div>
+        <div class="session-bar">
+          <div class="session-seg ss-closed-l">CLOSED</div>
+          <div class="session-seg ss-active">ACTIVE ★</div>
+          <div class="session-seg ss-closed-r">CLOSED</div>
+        </div>
+        <div class="session-ticks">
+          <span>00</span><span>04</span><span>08</span><span>12</span><span>16</span><span>20</span><span>24</span>
+        </div>
+        <div style="margin-top:12px;font-size:9px;color:var(--text);line-height:1.8">
+          <span style="color:var(--green)">08:00 GMT</span> London Open<br>
+          <span style="color:var(--gold)">13:00 GMT</span> NY Overlap begins<br>
+          <span style="color:var(--red)">17:00 GMT</span> Session closes
+        </div>
+      </div>
+      <div class="risk-side-card reveal">
+        <div class="rsc-title">ACCOUNT TYPES</div>
+        <div style="font-size:9px;color:var(--text);line-height:2">
+          <span style="color:var(--green)">✓</span> ECN/STP Hedging<br>
+          <span style="color:var(--green)">✓</span> Raw spread accounts<br>
+          <span style="color:var(--gold)">~</span> Standard accounts (wider spreads)<br>
+          <span style="color:var(--red)">✗</span> Netting accounts (partial exit off)<br>
+          <span style="color:var(--red)">✗</span> Fixed spread demo only
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACADEMIC -->
+<section id="academic-section">
+  <div class="section-header reveal">
+    <span class="section-num">07 /</span>
+    <span class="section-title">ACADEMIC FOUNDATION</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="academic-grid">
+    <div class="paper-card reveal reveal-delay-1">
+      <div class="paper-author">Zarith Sofia et al. · 2024</div>
+      <div class="paper-title">LWMA + Stochastic on XAU/USD M5</div>
+      <div class="paper-body">GA-optimized parameters. 5-year backtest 2019–2023. Only peer-reviewed study with direct XAUUSD M5 evidence. Foundation of core entry logic.</div>
+      <span class="paper-stat-val">+232%</span>
+      <span class="paper-stat-lbl">Annual return · 5-year backtest</span>
+    </div>
+    <div class="paper-card reveal reveal-delay-2">
+      <div class="paper-author">Hutabarat et al. · 2025</div>
+      <div class="paper-title">Bollinger Bands + RSI on MT5 XAUUSD</div>
+      <div class="paper-body">Direct MT5 gold study. BB + RSI confirmation architecture. Basis for the high-confidence signal upgrade layer in ScalpGold.</div>
+      <span class="paper-stat-val">PF 3.92</span>
+      <span class="paper-stat-lbl">Profit Factor · MT5 XAUUSD</span>
+    </div>
+    <div class="paper-card reveal reveal-delay-3">
+      <div class="paper-author">Zhang & Khushi · 2020</div>
+      <div class="paper-title">Genetic Algorithm + Sharpe-Sterling Ratio</div>
+      <div class="paper-body">Custom SSR fitness function for GA optimization. Basis for the OnTester() criterion: penalizes drawdown, rewards consistency.</div>
+      <span class="paper-stat-val">+320%</span>
+      <span class="paper-stat-lbl">AUD/USD · Custom SSR optimization</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">SCALP<span>GOLD</span> SNIPER</div>
+    <div style="font-size:9px;color:var(--gold-dim);letter-spacing:2px;margin-top:6px;line-height:2">
+      XAUUSD · M5 · METATRADER 5<br>
+      BY HATEF TABBAKHIAN (LEO) · MSC ECONOMICS & FINANCE<br>
+      <a href="https://github.com/Leotaby" target="_blank" style="color:var(--gold);text-decoration:none;letter-spacing:2px;">github.com/Leotaby</a>
+    </div>
+    <a class="footer-cta" href="https://www.mql5.com/en/market/product/168064" target="_blank">GET ON MQL5 MARKET →</a>
+  </div>
+  <div class="footer-info">
+    v5.0 &nbsp;·&nbsp; 5 Activations<br>
+    Introductory $49 · First 10 buyers<br>
+    Lifetime access to future updates<br>
+    <span style="color:rgba(255,255,255,0.15);font-size:8px;">Past performance does not guarantee future results.</span>
+  </div>
+</footer>
+
+</div><!-- page-content -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  THREE.JS PARTICLE BACKGROUND
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('canvas-bg');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 50);
+
+  // Gold floating particles
+  const count = 600;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    pos[i*3]   = (Math.random() - 0.5) * 200;
+    pos[i*3+1] = (Math.random() - 0.5) * 150;
+    pos[i*3+2] = (Math.random() - 0.5) * 100 - 20;
+    sizes[i] = Math.random() * 1.5 + 0.3;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  const mat = new THREE.PointsMaterial({
+    color: 0xE8B84B,
+    size: 0.25,
+    transparent: true,
+    opacity: 0.35,
+    sizeAttenuation: true
+  });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  // Grid plane far back
+  const gridHelper = new THREE.GridHelper(200, 30, 0x141830, 0x0d1020);
+  gridHelper.rotation.x = 0.3;
+  gridHelper.position.y = -30;
+  gridHelper.position.z = -30;
+  scene.add(gridHelper);
+
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.003;
+    points.rotation.y = t * 0.05;
+    points.rotation.x = Math.sin(t * 0.03) * 0.05;
+
+    const positions = geo.attributes.position.array;
+    for (let i = 0; i < count; i++) {
+      positions[i*3+1] += Math.sin(t + i * 0.01) * 0.003;
+    }
+    geo.attributes.position.needsUpdate = true;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+
+// ═══════════════════════════════════════════════════════════
+//  3D CANDLESTICK CHART (Three.js)
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('chart3d');
+  const wrap   = canvas.parentElement;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.shadowMap.enabled = true;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 500);
+  camera.position.set(0, 8, 38);
+  camera.lookAt(0, 0, 0);
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0x1a2040, 2));
+  const goldLight = new THREE.PointLight(0xE8B84B, 1.5, 60);
+  goldLight.position.set(0, 15, 10);
+  scene.add(goldLight);
+  const blueLight = new THREE.PointLight(0x0080ff, 0.8, 60);
+  blueLight.position.set(-20, 5, 10);
+  scene.add(blueLight);
+
+  // Generate fake candle data
+  const N = 60;
+  const candles = [];
+  let price = 3080;
+  const atr = 1.4;
+
+  for (let i = 0; i < N; i++) {
+    const open  = price;
+    const close = open + (Math.random() - 0.48) * atr * 2;
+    const high  = Math.max(open, close) + Math.random() * atr * 0.8;
+    const low   = Math.min(open, close) - Math.random() * atr * 0.8;
+    candles.push({ open, close, high, low });
+    price = close;
+  }
+
+  const minP = Math.min(...candles.map(c => c.low))   - atr;
+  const maxP = Math.max(...candles.map(c => c.high))  + atr;
+  const range = maxP - minP;
+  const scaleY = 16 / range;
+  const toY = p => (p - minP) * scaleY - 8;
+
+  const spacing = 0.55;
+  const totalW  = N * spacing;
+  const startX  = -totalW / 2;
+
+  const matGreen = new THREE.MeshStandardMaterial({ color: 0x00cc66, roughness: 0.3, metalness: 0.2 });
+  const matRed   = new THREE.MeshStandardMaterial({ color: 0xff2244, roughness: 0.3, metalness: 0.2 });
+
+  // Candle meshes
+  candles.forEach((c, i) => {
+    const x = startX + i * spacing;
+    const isBull = c.close >= c.open;
+    const mat = isBull ? matGreen : matRed;
+
+    // Body
+    const bodyH = Math.max(Math.abs(c.close - c.open) * scaleY, 0.05);
+    const bodyY = toY((c.open + c.close) / 2);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.3, bodyH, 0.3), mat);
+    body.position.set(x, bodyY, 0);
+    body.castShadow = true;
+    scene.add(body);
+
+    // Wick
+    const wickH = (c.high - c.low) * scaleY;
+    const wickY = toY((c.high + c.low) / 2);
+    const wick = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, wickH, 0.05),
+      new THREE.MeshStandardMaterial({ color: isBull ? 0x00aa44 : 0xcc1133, roughness: 0.5 })
+    );
+    wick.position.set(x, wickY, 0);
+    scene.add(wick);
+  });
+
+  // LWMA line
+  const lwmaPts = [];
+  const period = 20;
+  for (let i = period - 1; i < N; i++) {
+    let sum = 0, w = 0;
+    for (let j = 0; j < period; j++) {
+      const weight = j + 1;
+      sum += candles[i - (period - 1 - j)].close * weight;
+      w += weight;
+    }
+    const x = startX + i * spacing;
+    lwmaPts.push(new THREE.Vector3(x, toY(sum / w), 0.5));
+  }
+  const lwmaGeo = new THREE.BufferGeometry().setFromPoints(lwmaPts);
+  const lwmaLine = new THREE.Line(lwmaGeo, new THREE.LineBasicMaterial({ color: 0x00c8ff, linewidth: 2 }));
+  scene.add(lwmaLine);
+
+  // Bollinger Bands
+  const bbUpper = [], bbLower = [], bbMid = [];
+  const bbP = 20;
+  for (let i = bbP - 1; i < N; i++) {
+    const slice = candles.slice(i - bbP + 1, i + 1).map(c => c.close);
+    const mean = slice.reduce((a, b) => a + b, 0) / bbP;
+    const std  = Math.sqrt(slice.reduce((a, b) => a + (b - mean) ** 2, 0) / bbP);
+    const x = startX + i * spacing;
+    bbUpper.push(new THREE.Vector3(x, toY(mean + 2 * std), 0.3));
+    bbLower.push(new THREE.Vector3(x, toY(mean - 2 * std), 0.3));
+    bbMid.push(new THREE.Vector3(x,   toY(mean),           0.3));
+  }
+  const bbMat    = new THREE.LineBasicMaterial({ color: 0xE8B84B, opacity: 0.5, transparent: true });
+  const bbMidMat = new THREE.LineBasicMaterial({ color: 0xE8B84B, opacity: 0.25, transparent: true });
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(bbUpper), bbMat));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(bbLower), bbMat));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(bbMid),   bbMidMat));
+
+  // BUY / SELL signal markers
+  for (let i = 22; i < N; i++) {
+    const x = startX + i * spacing;
+    const isSig = (i % 12 === 0);
+    const isStr = (i % 20 === 0);
+    if (!isSig && !isStr) continue;
+
+    const isBull = candles[i].close > candles[i].open;
+    const y = isBull ? toY(candles[i].low) - 1.5 : toY(candles[i].high) + 1.5;
+
+    // Arrow cone
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.22, 0.6, 8),
+      new THREE.MeshStandardMaterial({
+        color: isBull ? 0x00ff88 : 0xff3060,
+        emissive: isBull ? 0x00ff88 : 0xff3060,
+        emissiveIntensity: 0.4,
+        roughness: 0.2
+      })
+    );
+    cone.rotation.z = isBull ? 0 : Math.PI;
+    cone.position.set(x, y, 0.5);
+    scene.add(cone);
+
+    // Star glow for high confidence
+    if (isStr) {
+      const glow = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5, 16, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0xE8B84B,
+          emissive: 0xE8B84B,
+          emissiveIntensity: 0.8,
+          transparent: true,
+          opacity: 0.4
+        })
+      );
+      glow.position.set(x, y + (isBull ? -0.8 : 0.8), 0.5);
+      scene.add(glow);
+    }
+  }
+
+  // Trailing stop line (last portion)
+  const trailPts = [];
+  for (let i = 35; i < 55; i++) {
+    const x = startX + i * spacing;
+    trailPts.push(new THREE.Vector3(x, toY(candles[i].close - atr * 0.9), 0.4));
+  }
+  scene.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(trailPts),
+    new THREE.LineBasicMaterial({ color: 0xb87fff, opacity: 0.7, transparent: true })
+  ));
+
+  // Animate
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.005;
+    camera.position.x = Math.sin(t * 0.15) * 3;
+    camera.position.y = 8 + Math.sin(t * 0.1) * 1;
+    camera.lookAt(0, 0, 0);
+    goldLight.position.x = Math.sin(t * 0.2) * 15;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    const nW = wrap.clientWidth, nH = wrap.clientHeight;
+    camera.aspect = nW / nH;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nW, nH);
+  });
+})();
+
+
+// ═══════════════════════════════════════════════════════════
+//  EXIT SYSTEM CANVAS (2D animated)
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('exitCanvas');
+  const wrap   = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  let t = 0;
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Background grid
+    ctx.strokeStyle = 'rgba(20,25,50,0.6)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 50) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // Price levels
+    const entryY  = H * 0.58;
+    const slY     = H * 0.80;
+    const tpY     = H * 0.20;
+    const bbMidY  = H * 0.42;
+    const trailY0 = H * 0.70;
+    const trailY1 = H * 0.55;
+
+    // TP line
+    ctx.setLineDash([8, 5]);
+    ctx.strokeStyle = 'rgba(0,255,136,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(60, tpY); ctx.lineTo(W - 20, tpY); ctx.stroke();
+    ctx.fillStyle = 'rgba(0,255,136,0.7)';
+    ctx.font = '9px JetBrains Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText('TAKE PROFIT  2.5×ATR', W - 180, tpY - 7);
+
+    // SL line
+    ctx.strokeStyle = 'rgba(255,48,96,0.4)';
+    ctx.beginPath(); ctx.moveTo(60, slY); ctx.lineTo(W - 20, slY); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,48,96,0.7)';
+    ctx.fillText('STOP LOSS  1.5×ATR', W - 175, slY + 15);
+
+    // BB Mid
+    ctx.strokeStyle = 'rgba(232,184,75,0.3)';
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.moveTo(60, bbMidY); ctx.lineTo(W - 20, bbMidY); ctx.stroke();
+    ctx.fillStyle = 'rgba(232,184,75,0.6)';
+    ctx.fillText('BB MIDLINE  50% EXIT', W - 185, bbMidY - 7);
+
+    // Entry line
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(0,200,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(60, entryY); ctx.lineTo(W - 20, entryY); ctx.stroke();
+    ctx.fillStyle = 'rgba(0,200,255,0.8)';
+    ctx.fillText('ENTRY', W - 75, entryY + 15);
+
+    // Animated price path
+    const progress = ((t * 0.4) % 1);
+    const pathEndX = 80 + (W - 200) * Math.min(progress * 1.4, 1);
+
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#00c8ff';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#00c8ff';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.moveTo(80, entryY);
+
+    const steps = 120;
+    let partialY = entryY;
+    let partialClose = false;
+
+    for (let i = 0; i <= steps; i++) {
+      const frac = i / steps;
+      const cx   = 80 + (W - 200) * frac;
+      if (cx > pathEndX) break;
+
+      const noise = Math.sin(i * 0.4 + t * 2) * 8 + Math.sin(i * 0.15) * 12;
+      let py = entryY - frac * (entryY - tpY) * 0.85 + noise;
+
+      // Clamp to SL
+      if (py > slY) py = slY;
+
+      partialY = py;
+      if (!partialClose && py < bbMidY + 5) partialClose = true;
+      ctx.lineTo(cx, py);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Trailing stop line
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = 'rgba(184,127,255,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const trailStart = 80 + (W - 200) * 0.3;
+    const trailEnd   = Math.min(80 + (W - 200) * 0.7, pathEndX);
+    if (trailEnd > trailStart) {
+      ctx.moveTo(trailStart, trailY0);
+      ctx.bezierCurveTo(trailStart + 80, trailY0, trailEnd - 80, trailY1, trailEnd, trailY1);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(184,127,255,0.7)';
+      ctx.font = '9px JetBrains Mono';
+      ctx.fillText('TRAILING STOP  0.75×ATR', trailStart + 10, trailY0 + 14);
+    }
+
+    // Moving price dot
+    if (progress < 0.72) {
+      const dotX = pathEndX;
+      const dotNoise = Math.sin(progress * steps * 0.4 + t * 2) * 8 + Math.sin(progress * steps * 0.15) * 12;
+      const dotY = entryY - progress / 0.72 * (entryY - tpY) * 0.85 + dotNoise;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#00c8ff';
+      ctx.shadowColor = '#00c8ff';
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Partial exit marker
+    if (partialClose && pathEndX > 80 + (W - 200) * 0.4) {
+      const pX = 80 + (W - 200) * 0.42;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(pX, bbMidY, 7, 0, Math.PI * 2);
+      ctx.strokeStyle = '#E8B84B';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = '#E8B84B';
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(232,184,75,0.9)';
+      ctx.font = '8px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('50%', pX, bbMidY - 14);
+      ctx.fillText('EXIT', pX, bbMidY - 5);
+      ctx.shadowBlur = 0;
+    }
+
+    // TP hit marker
+    if (progress > 0.88) {
+      const hitX = 80 + (W - 200) * 0.88;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(hitX, tpY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,255,136,0.2)';
+      ctx.fill();
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = '#00ff88';
+      ctx.shadowBlur = 15;
+      ctx.stroke();
+      ctx.fillStyle = '#00ff88';
+      ctx.font = '9px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('TP ✓', hitX, tpY - 16);
+      ctx.shadowBlur = 0;
+    }
+
+    // R/R annotation
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(255,48,96,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(120, entryY); ctx.lineTo(120, slY); ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,255,136,0.3)';
+    ctx.beginPath(); ctx.moveTo(120, entryY); ctx.lineTo(120, tpY); ctx.stroke();
+    ctx.fillStyle = 'rgba(232,184,75,0.8)';
+    ctx.font = 'bold 10px JetBrains Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText('R/R 1:1.67', 130, (entryY + tpY) / 2 + 4);
+
+    t += 0.008;
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  window.addEventListener('resize', () => {
+    canvas.width  = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+  });
+})();
+
+
+// ═══════════════════════════════════════════════════════════
+//  SCROLLING CODE WINDOW
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const lines = [
+    `<span class="cmt">// ScalpGold Sniper EA v5.0 — Hatef Tabbakhian (LEO)</span>`,
+    `<span class="cmt">// © 2026 All rights reserved · MQL5 Market</span>`,
+    ``,
+    `<span class="kw">#property</span> <span class="var">copyright</span> <span class="str">"Hatef Tabbakhian (LEO)"</span>`,
+    `<span class="kw">#property</span> <span class="var">version</span>   <span class="str">"5.00"</span>`,
+    `<span class="kw">#include</span> <span class="str">&lt;Trade\\Trade.mqh&gt;</span>`,
+    ``,
+    `<span class="cmt">// ── Input Parameters ────────────────────────</span>`,
+    `<span class="kw">input</span> <span class="typ">int</span>    <span class="var">LWMAPeriod</span>    <span class="op">=</span> <span class="num">20</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">int</span>    <span class="var">StochK</span>        <span class="op">=</span> <span class="num">14</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">int</span>    <span class="var">StochD</span>        <span class="op">=</span> <span class="num">3</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">double</span> <span class="var">RiskPct</span>       <span class="op">=</span> <span class="num">0.75</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">double</span> <span class="var">SL_ATR</span>        <span class="op">=</span> <span class="num">1.5</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">double</span> <span class="var">TP_ATR</span>        <span class="op">=</span> <span class="num">2.5</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">double</span> <span class="var">MaxDailyDD</span>    <span class="op">=</span> <span class="num">3.0</span><span class="punc">;</span>`,
+    `<span class="kw">input</span> <span class="typ">int</span>    <span class="var">MaxSpreadPts</span>  <span class="op">=</span> <span class="num">35</span><span class="punc">;</span>`,
+    ``,
+    `<span class="cmt">// ── OnInit ──────────────────────────────────</span>`,
+    `<span class="typ">int</span> <span class="fn">OnInit</span>()<span class="punc">{</span>`,
+    `  <span class="var">h_lwma</span>  <span class="op">=</span> <span class="fn">iMA</span>(<span class="var">_Symbol</span><span class="punc">,PERIOD_M5,</span><span class="var">LWMAPeriod</span><span class="punc">,0,</span>`,
+    `              <span class="const">MODE_LWMA</span><span class="punc">,</span><span class="const">PRICE_CLOSE</span>)<span class="punc">;</span>`,
+    `  <span class="var">h_stoch</span> <span class="op">=</span> <span class="fn">iStochastic</span>(<span class="var">_Symbol</span><span class="punc">,PERIOD_M5,</span>`,
+    `              <span class="var">StochK</span><span class="punc">,</span><span class="var">StochD</span><span class="punc">,</span><span class="num">3</span><span class="punc">,</span><span class="const">MODE_SMA</span><span class="punc">,</span><span class="const">STO_LOWHIGH</span>)<span class="punc">;</span>`,
+    `  <span class="var">h_atr</span>   <span class="op">=</span> <span class="fn">iATR</span>(<span class="var">_Symbol</span><span class="punc">,PERIOD_M5,</span><span class="num">14</span>)<span class="punc">;</span>`,
+    `  <span class="var">h_bb</span>    <span class="op">=</span> <span class="fn">iBands</span>(<span class="var">_Symbol</span><span class="punc">,PERIOD_M5,</span><span class="num">20</span><span class="punc">,0,</span><span class="num">2.0</span><span class="punc">,</span><span class="const">PRICE_CLOSE</span>)<span class="punc">;</span>`,
+    `  <span class="var">h_rsi</span>   <span class="op">=</span> <span class="fn">iRSI</span>(<span class="var">_Symbol</span><span class="punc">,PERIOD_M5,</span><span class="num">14</span><span class="punc">,</span><span class="const">PRICE_CLOSE</span>)<span class="punc">;</span>`,
+    `  <span class="kw">return</span>(<span class="const">INIT_SUCCEEDED</span>)<span class="punc">;</span>`,
+    `<span class="punc">}</span>`,
+    ``,
+    `<span class="cmt">// ── CheckSignal ──────────────────────────────</span>`,
+    `<span class="typ">int</span> <span class="fn">CheckSignal</span>()<span class="punc">{</span>`,
+    `  <span class="kw">if</span>(<span class="fn">IsSpreadOK</span>() <span class="op">==</span> <span class="kw">false</span>) <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>`,
+    `  <span class="kw">if</span>(<span class="fn">IsSessionOK</span>() <span class="op">==</span> <span class="kw">false</span>) <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>`,
+    `  <span class="kw">if</span>(<span class="fn">IsDailyDDBreached</span>()) <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>`,
+    ``,
+    `  <span class="cmt">// Layer 1 — trend gate</span>`,
+    `  <span class="typ">double</span> <span class="var">lwma</span>  <span class="op">=</span> <span class="fn">GetBuffer</span>(<span class="var">h_lwma</span><span class="punc">,0,1</span>)<span class="punc">;</span>`,
+    `  <span class="typ">bool</span>   <span class="var">above</span> <span class="op">=</span> <span class="fn">close</span>(<span class="num">1</span>) <span class="op">&gt;</span> <span class="var">lwma</span><span class="punc">;</span>`,
+    `  <span class="kw">if</span>(<span class="op">!</span><span class="fn">M15TrendAgrees</span>(<span class="var">above</span>)) <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>`,
+    ``,
+    `  <span class="cmt">// Layer 2 — stochastic extreme crossover</span>`,
+    `  <span class="typ">double</span> <span class="var">K0</span><span class="op">=</span><span class="fn">GetBuffer</span>(<span class="var">h_stoch</span><span class="punc">,0,1</span>)<span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">K1</span><span class="op">=</span><span class="fn">GetBuffer</span>(<span class="var">h_stoch</span><span class="punc">,0,2</span>)<span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">D0</span><span class="op">=</span><span class="fn">GetBuffer</span>(<span class="var">h_stoch</span><span class="punc">,1,1</span>)<span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">D1</span><span class="op">=</span><span class="fn">GetBuffer</span>(<span class="var">h_stoch</span><span class="punc">,1,2</span>)<span class="punc">;</span>`,
+    `  <span class="typ">bool</span> <span class="var">buyTrig</span> <span class="op">=</span> <span class="var">K1</span><span class="op">&lt;</span><span class="var">D1</span> <span class="op">&amp;&amp;</span> <span class="var">K0</span><span class="op">&gt;=</span><span class="var">D0</span> <span class="op">&amp;&amp;</span> <span class="var">K0</span><span class="op">&lt;</span><span class="num">30</span><span class="punc">;</span>`,
+    `  <span class="typ">bool</span> <span class="var">selTrig</span> <span class="op">=</span> <span class="var">K1</span><span class="op">&gt;</span><span class="var">D1</span> <span class="op">&amp;&amp;</span> <span class="var">K0</span><span class="op">&lt;=</span><span class="var">D0</span> <span class="op">&amp;&amp;</span> <span class="var">K0</span><span class="op">&gt;</span><span class="num">70</span><span class="punc">;</span>`,
+    `  <span class="kw">if</span>(<span class="op">!</span><span class="var">buyTrig</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="var">selTrig</span>) <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>`,
+    ``,
+    `  <span class="cmt">// Layer 3 — BB + RSI upgrade (optional)</span>`,
+    `  <span class="typ">int</span> <span class="var">strength</span> <span class="op">=</span> <span class="num">2</span><span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">rsi</span>     <span class="op">=</span> <span class="fn">GetBuffer</span>(<span class="var">h_rsi</span><span class="punc">,0,1</span>)<span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">bbLo</span>    <span class="op">=</span> <span class="fn">GetBuffer</span>(<span class="var">h_bb</span><span class="punc">,2,1</span>)<span class="punc">;</span>`,
+    `  <span class="kw">if</span>(<span class="var">buyTrig</span> <span class="op">&amp;&amp;</span> <span class="fn">close</span>(<span class="num">1</span>)<span class="op">&lt;=</span><span class="var">bbLo</span><span class="op">*</span><span class="num">1.002</span>`,
+    `         <span class="op">&amp;&amp;</span> <span class="var">rsi</span><span class="op">&lt;</span><span class="num">35</span>) <span class="var">strength</span><span class="op">=</span><span class="num">3</span><span class="punc">;</span>`,
+    `  <span class="kw">return</span> <span class="var">buyTrig</span> <span class="op">?</span> <span class="var">strength</span> <span class="op">:</span> <span class="op">-</span><span class="var">strength</span><span class="punc">;</span>`,
+    `<span class="punc">}</span>`,
+    ``,
+    `<span class="cmt">// ── CalcLot ──────────────────────────────────</span>`,
+    `<span class="typ">double</span> <span class="fn">CalcLot</span>(<span class="typ">int</span> <span class="var">strength</span><span class="punc">,</span><span class="typ">double</span> <span class="var">atr</span>)<span class="punc">{</span>`,
+    `  <span class="typ">double</span> <span class="var">risk</span>  <span class="op">=</span> <span class="fn">AccountEquity</span>() <span class="op">*</span> <span class="var">RiskPct</span><span class="op">/</span><span class="num">100.0</span>`,
+    `                <span class="op">*</span> (<span class="var">strength</span><span class="op">==</span><span class="num">3</span> <span class="op">?</span> <span class="num">1.25</span> <span class="op">:</span> <span class="num">1.0</span>)<span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">slDist</span><span class="op">=</span> <span class="var">atr</span> <span class="op">*</span> <span class="var">SL_ATR</span><span class="punc">;</span>`,
+    `  <span class="typ">double</span> <span class="var">lot</span>   <span class="op">=</span> <span class="var">risk</span> <span class="op">/</span>`,
+    `    (<span class="var">slDist</span><span class="op">/</span><span class="fn">SymbolInfoDouble</span>(<span class="var">_Symbol</span><span class="punc">,SYMBOL_TRADE_TICK_SIZE</span>)`,
+    `    <span class="op">*</span> <span class="fn">SymbolInfoDouble</span>(<span class="var">_Symbol</span><span class="punc">,SYMBOL_TRADE_TICK_VALUE</span>))<span class="punc">;</span>`,
+    `  <span class="kw">return</span> <span class="fn">NormalizeLot</span>(<span class="var">lot</span>)<span class="punc">;</span>`,
+    `<span class="punc">}</span>`,
+    ``,
+    `<span class="cmt">// ── ManageTrailing ───────────────────────────</span>`,
+    `<span class="kw">void</span> <span class="fn">ManageTrailing</span>()<span class="punc">{</span>`,
+    `  <span class="kw">for</span>(<span class="typ">int</span> <span class="var">i</span><span class="op">=</span><span class="fn">PositionsTotal</span>()<span class="op">-</span><span class="num">1</span><span class="punc">;</span><span class="var">i</span><span class="op">&gt;=</span><span class="num">0</span><span class="punc">;</span><span class="var">i</span><span class="op">--</span>)<span class="punc">{</span>`,
+    `    <span class="kw">if</span>(<span class="op">!</span><span class="fn">IsMine</span>(<span class="var">i</span>)) <span class="kw">continue</span><span class="punc">;</span>`,
+    `    <span class="typ">double</span> <span class="var">atr</span>     <span class="op">=</span> <span class="fn">GetATR</span>()<span class="punc">;</span>`,
+    `    <span class="typ">double</span> <span class="var">profit</span>  <span class="op">=</span> <span class="fn">PositionGetDouble</span>(<span class="const">POSITION_PROFIT</span>)<span class="punc">;</span>`,
+    `    <span class="kw">if</span>(<span class="var">profit</span> <span class="op">&lt;</span> <span class="var">atr</span> <span class="op">*</span> <span class="num">1.0</span>) <span class="kw">continue</span><span class="punc">;</span>`,
+    `    <span class="typ">double</span> <span class="var">newSL</span> <span class="op">=</span> <span class="fn">ask</span>() <span class="op">-</span> <span class="var">atr</span> <span class="op">*</span> <span class="num">0.75</span><span class="punc">;</span>`,
+    `    <span class="kw">if</span>(<span class="fn">ValidStop</span>(<span class="var">newSL</span>)) <span class="fn">ModifySL</span>(<span class="var">newSL</span>)<span class="punc">;</span>`,
+    `  <span class="punc">}}</span>`,
+    ``,
+    `<span class="cmt">// ── © 2026 Hatef Tabbakhian (LEO) ───────────</span>`,
+    `<span class="cmt">// ── Proprietary · All rights reserved ───────</span>`,
+  ];
+
+  // Build double-length for seamless loop
+  const allLines = [...lines, ...lines];
+  const container = document.getElementById('codeScroll');
+  if (!container) return;
+
+  let html = '';
+  allLines.forEach((line, i) => {
+    const num = (i % lines.length) + 1;
+    html += `<div class="code-line" style="animation-delay:${(i % lines.length) * 0.04}s">
+      <span class="ln">${String(num).padStart(2,'0')}</span>
+      <span>${line}</span>
+    </div>`;
+  });
+  container.innerHTML = html;
+})();
+
+
+// ═══════════════════════════════════════════════════════════
+(function() {
+  let price = 3082.45;
+  const priceEl  = document.getElementById('livePrice');
+  const changeEl = document.getElementById('liveChange');
+  const basePrice = 3082.45;
+
+  setInterval(() => {
+    price += (Math.random() - 0.49) * 0.4;
+    const pct = ((price - basePrice) / basePrice * 100).toFixed(2);
+    priceEl.textContent = price.toFixed(2);
+    const isUp = price >= basePrice;
+    changeEl.textContent = (isUp ? '+' : '') + pct + '%';
+    changeEl.style.color = isUp ? 'var(--green)' : 'var(--red)';
+  }, 1200);
+})();
+
+
+// ═══════════════════════════════════════════════════════════
+//  SCROLL REVEAL
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const els = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  els.forEach(el => observer.observe(el));
+})();
+</script>
+</body>
+</html>

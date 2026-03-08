@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScalpGold Sniper EA</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #E8B84B;
+  --gold2: #c99a2e;
+  --glow: rgba(232,184,75,0.18);
+  --bg: #060810;
+  --panel: #0b0d16;
+  --border: #13172a;
+  --green: #22c55e;
+  --red: #f43f5e;
+  --blue: #38bdf8;
+  --purple: #a78bfa;
+  --text: #bcc5e0;
+  --dim: #354060;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+  width: 900px;
+  margin: 0 auto;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  padding: 52px 48px 44px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #060810 0%, #0c0e1a 50%, #060810 100%);
+  border-bottom: 1px solid var(--border);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.hero-glow {
+  position: absolute;
+  width: 500px; height: 300px;
+  background: radial-gradient(ellipse, rgba(232,184,75,0.08), transparent 70%);
+  top: -50px; left: 50%; transform: translateX(-50%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; }
+.hero-eyebrow {
+  font-size: 10px; letter-spacing: 5px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px; line-height: 0.92;
+  letter-spacing: 3px;
+}
+.hero-title .white { color: #fff; }
+.hero-title .gold  { color: var(--gold); }
+.hero-title .dim   { color: var(--dim); font-size: 32px; letter-spacing: 8px; }
+.hero-tagline {
+  margin-top: 16px; font-size: 12px; color: var(--dim);
+  letter-spacing: 2px; line-height: 1.8;
+}
+.hero-badge {
+  position: absolute; right: 48px; top: 52px;
+  text-align: right;
+}
+.badge-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px; color: var(--gold); line-height: 1;
+  text-shadow: 0 0 30px rgba(232,184,75,0.4);
+}
+.badge-note { font-size: 9px; color: var(--dim); letter-spacing: 2px; margin-top: 2px; }
+.badge-pill {
+  display: inline-block; margin-top: 8px;
+  background: rgba(232,184,75,0.1); border: 1px solid rgba(232,184,75,0.3);
+  color: var(--gold); font-size: 9px; letter-spacing: 2px;
+  padding: 4px 10px; border-radius: 2px;
+}
+
+/* ── STATS STRIP ── */
+.stats-strip {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.stat-cell {
+  flex: 1; padding: 18px 20px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-cell.s1::before { background: var(--blue); }
+.stat-cell.s2::before { background: var(--gold); }
+.stat-cell.s3::before { background: var(--green); }
+.stat-cell.s4::before { background: var(--purple); }
+.stat-cell.s5::before { background: var(--red); }
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; line-height: 1; margin-bottom: 4px;
+}
+.stat-label { font-size: 9px; color: var(--dim); letter-spacing: 2px; }
+
+/* ── LAYOUT BODY ── */
+.body { padding: 32px 36px; }
+
+/* ── SECTION HEADER ── */
+.sh {
+  font-size: 9px; letter-spacing: 5px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.sh::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── FLOW ── */
+.flow { display:flex; align-items:stretch; gap:0; margin-bottom:36px; }
+.flow-card {
+  flex:1; background:var(--panel); border:1px solid var(--border);
+  padding:18px 14px; position:relative; overflow:hidden;
+  transition: border-color 0.2s;
+}
+.flow-card:hover { border-color: rgba(232,184,75,0.4); }
+.flow-card::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+}
+.flow-card.c1::after { background:var(--blue); }
+.flow-card.c2::after { background:var(--gold); }
+.flow-card.c3::after { background:var(--purple); }
+.flow-card.c4::after { background:var(--green); }
+.flow-num {
+  font-family:'Bebas Neue',sans-serif; font-size:42px; color:var(--border);
+  position:absolute; bottom:-4px; right:8px; line-height:1;
+}
+.flow-icon { font-size:18px; margin-bottom:8px; }
+.flow-title {
+  font-size:10px; font-weight:500; color:#fff;
+  letter-spacing:2px; text-transform:uppercase; margin-bottom:6px;
+}
+.flow-desc { font-size:10px; color:var(--dim); line-height:1.7; }
+.flow-sep {
+  width:24px; flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; color:var(--dim); font-size:12px;
+}
+
+/* ── SIGNAL ANATOMY ── */
+.anatomy { margin-bottom:36px; }
+.anatomy-wrap {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:16px; position:relative;
+}
+svg.chart { width:100%; display:block; }
+
+/* ── ENTRY GRID ── */
+.entry-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:36px; }
+.entry-card { background:var(--panel); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+.entry-head {
+  padding:10px 16px; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px;
+  display:flex; align-items:center; gap:8px;
+}
+.entry-head.buy  { background:rgba(34,197,94,0.1);  color:var(--green); border-bottom:1px solid rgba(34,197,94,0.2); }
+.entry-head.sell { background:rgba(244,63,94,0.1);  color:var(--red);   border-bottom:1px solid rgba(244,63,94,0.2); }
+.entry-body { padding:14px 16px; display:flex; flex-direction:column; gap:7px; }
+.cond {
+  display:flex; align-items:flex-start; gap:9px; font-size:10px; line-height:1.5;
+}
+.dot {
+  width:5px; height:5px; border-radius:50%; margin-top:4px; flex-shrink:0;
+}
+.dot.b { background:var(--blue);   box-shadow:0 0 5px var(--blue); }
+.dot.g { background:var(--green);  box-shadow:0 0 5px var(--green); }
+.dot.o { background:var(--gold);   box-shadow:0 0 5px var(--gold); }
+.dot.r { background:var(--red);    box-shadow:0 0 5px var(--red); }
+.clabel { color:var(--dim); }
+.cval   { color:#dde4f5; font-weight:500; }
+.strong-tag {
+  margin-top:4px; padding:5px 10px;
+  background:rgba(232,184,75,0.07); border:1px solid rgba(232,184,75,0.18);
+  color:var(--gold); font-size:9px; letter-spacing:2px; border-radius:2px;
+}
+
+/* ── INDICATORS ── */
+.ind-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:36px; }
+.ind-card {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:14px; position:relative; overflow:hidden;
+}
+.ind-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.ind-card.ib::before  { background:var(--blue); }
+.ind-card.ig::before  { background:var(--gold); }
+.ind-card.it::before  { background:#06b6d4; }
+.ind-card.ip::before  { background:var(--purple); }
+.ind-card.igr::before { background:var(--green); }
+.ind-card.ir::before  { background:var(--red); }
+.ind-name {
+  font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:2px; margin-bottom:2px;
+}
+.ind-param { font-size:9px; color:var(--gold); letter-spacing:1px; margin-bottom:8px; }
+.ind-role  { font-size:9px; color:var(--dim); line-height:1.7; }
+
+/* ── EXIT ROW ── */
+.exit-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:36px; }
+.exit-card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:4px; padding:16px 12px; text-align:center;
+}
+.exit-val {
+  font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); letter-spacing:1px;
+}
+.exit-unit { font-size:9px; color:var(--dim); letter-spacing:2px; margin-bottom:6px; }
+.exit-lbl  { font-size:9px; color:var(--text); line-height:1.5; }
+
+/* ── RISK GRID ── */
+.risk-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:36px; }
+.risk-cell {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:12px 16px; display:flex; justify-content:space-between; align-items:center;
+}
+.risk-lbl { font-size:9px; color:var(--dim); line-height:1.6; }
+.risk-val {
+  font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--gold); letter-spacing:1px;
+}
+
+/* ── TIMELINE ── */
+.timeline-wrap { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:18px 20px; margin-bottom:36px; }
+.tbar {
+  height:26px; background:#080a12; border-radius:3px; position:relative; overflow:hidden;
+  margin-bottom:6px;
+}
+.tseg {
+  position:absolute; top:0; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:8px; letter-spacing:2px; font-weight:500;
+}
+.tlabels {
+  display:flex; justify-content:space-between;
+  font-size:8px; color:var(--dim); letter-spacing:1px; margin-bottom:14px;
+}
+.tstats { display:flex; gap:8px; }
+.tstat {
+  flex:1; background:#080a12; border-radius:3px; padding:10px 12px; text-align:center;
+}
+.tstat-val { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold); }
+.tstat-lbl { font-size:8px; color:var(--dim); letter-spacing:2px; }
+
+/* ── SCIENCE ── */
+.sci-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:36px; }
+.sci-card {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:14px; border-left:2px solid var(--gold);
+}
+.sci-author { font-size:9px; color:var(--gold); letter-spacing:2px; margin-bottom:4px; }
+.sci-title  { font-size:10px; color:#dde4f5; font-weight:500; margin-bottom:6px; line-height:1.4; }
+.sci-body   { font-size:9px; color:var(--dim); line-height:1.7; margin-bottom:8px; }
+.sci-stat   { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--green); letter-spacing:1px; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align:center; padding:24px 36px 36px;
+  border-top:1px solid var(--border);
+  font-size:9px; color:var(--dim); letter-spacing:2px; line-height:2;
+}
+.footer-brand {
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:5px;
+  color:var(--gold); margin-bottom:6px;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">MT5 Expert Advisor · XAUUSD · M5 Timeframe</div>
+    <div class="hero-title">
+      <div class="white">SCALP</div>
+      <div class="gold">GOLD</div>
+      <div class="dim">SNIPER EA</div>
+    </div>
+    <div class="hero-tagline">
+      Evidence-Based Gold Scalping &nbsp;·&nbsp; LWMA + Stochastic + BB + RSI<br>
+      ATR-Adaptive Exits &nbsp;·&nbsp; Built on Peer-Reviewed Research
+    </div>
+  </div>
+  <div class="hero-badge">
+    <div class="badge-price">$49</div>
+    <div class="badge-note">INTRODUCTORY — FIRST 10 BUYERS</div>
+    <div class="badge-pill">⬆ PRICE INCREASES AFTER 10 SALES</div>
+    <div style="margin-top:10px; font-size:9px; color:var(--dim); letter-spacing:1px;">
+      MSc Economics & Finance<br>
+      Globally Ranked University
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-cell s1">
+    <div class="stat-val" style="color:var(--blue)">M5</div>
+    <div class="stat-label">TIMEFRAME</div>
+  </div>
+  <div class="stat-cell s2">
+    <div class="stat-val" style="color:var(--gold)">XAUUSD</div>
+    <div class="stat-label">INSTRUMENT</div>
+  </div>
+  <div class="stat-cell s3">
+    <div class="stat-val" style="color:var(--green)">0.75%</div>
+    <div class="stat-label">RISK / TRADE</div>
+  </div>
+  <div class="stat-cell s4">
+    <div class="stat-val" style="color:var(--purple)">1:1.67</div>
+    <div class="stat-label">RISK-REWARD</div>
+  </div>
+  <div class="stat-cell s5">
+    <div class="stat-val" style="color:var(--red)">3%</div>
+    <div class="stat-label">DAILY DD LIMIT</div>
+  </div>
+</div>
+
+<div class="body">
+
+<!-- SIGNAL FLOW -->
+<div class="sh">Signal Generation Pipeline</div>
+<div class="flow" style="margin-bottom:36px;">
+  <div class="flow-card c1">
+    <div class="flow-num">01</div>
+    <div class="flow-icon">📡</div>
+    <div class="flow-title">M15 Trend</div>
+    <div class="flow-desc">LWMA(20) on M15 confirms the macro direction. Counter-trend signals are blocked entirely.</div>
+  </div>
+  <div class="flow-sep">›</div>
+  <div class="flow-card c2">
+    <div class="flow-num">02</div>
+    <div class="flow-icon">⚡</div>
+    <div class="flow-title">M5 Momentum</div>
+    <div class="flow-desc">Stochastic(14,3,3) crossover from the extreme zone (&lt;30 or &gt;70) fires the trigger.</div>
+  </div>
+  <div class="flow-sep">›</div>
+  <div class="flow-card c3">
+    <div class="flow-num">03</div>
+    <div class="flow-icon">🎯</div>
+    <div class="flow-title">BB + RSI</div>
+    <div class="flow-desc">Price at band edge + RSI extreme = HIGH CONFIDENCE. Lot size +25%, tighter SL.</div>
+  </div>
+  <div class="flow-sep">›</div>
+  <div class="flow-card c4">
+    <div class="flow-num">04</div>
+    <div class="flow-icon">✅</div>
+    <div class="flow-title">Order Sent</div>
+    <div class="flow-desc">ATR-based SL/TP. Margin verified. Spread &amp; session checked. Position opened.</div>
+  </div>
+</div>
+
+<!-- SIGNAL ANATOMY CHART -->
+<div class="sh">Signal Anatomy</div>
+<div class="anatomy-wrap" style="margin-bottom:36px;">
+  <svg class="chart" viewBox="0 0 828 170" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="gg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="rg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- grid -->
+    <line x1="0" y1="42" x2="828" y2="42" stroke="#13172a" stroke-width="1"/>
+    <line x1="0" y1="85" x2="828" y2="85" stroke="#13172a" stroke-width="1"/>
+    <line x1="0" y1="128" x2="828" y2="128" stroke="#13172a" stroke-width="1"/>
+    <!-- BB -->
+    <path d="M0,28 C80,24 160,26 240,32 C320,38 380,35 460,30 C540,25 620,27 720,26 C780,25 810,25 828,25"
+          fill="none" stroke="#E8B84B28" stroke-width="1" stroke-dasharray="4,3"/>
+    <path d="M0,132 C80,136 160,134 240,130 C320,126 380,129 460,134 C540,139 620,137 720,138 C780,138 810,138 828,138"
+          fill="none" stroke="#E8B84B28" stroke-width="1" stroke-dasharray="4,3"/>
+    <path d="M0,28 C80,24 160,26 240,32 C320,38 380,35 460,30 C540,25 620,27 720,26 C780,25 810,25 828,25
+             L828,138 C810,138 780,138 720,138 C620,137 540,139 460,134 C380,129 320,126 240,130 C160,134 80,136 0,132 Z"
+          fill="rgba(232,184,75,0.03)"/>
+    <!-- BB mid -->
+    <path d="M0,80 C200,80 400,82 600,81 C700,81 780,80 828,80"
+          fill="none" stroke="#E8B84B18" stroke-width="1" stroke-dasharray="6,4"/>
+    <!-- LWMA -->
+    <path d="M0,95 C60,98 120,102 180,99 C240,96 300,88 360,82 C420,76 480,72 540,78 C600,84 660,88 720,84 C780,80 810,78 828,77"
+          fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+    <!-- Bearish candles L side -->
+    <line x1="50"  y1="92" x2="50"  y2="108" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="46"  y="96"  width="8" height="8" fill="#f43f5e" rx="1"/>
+    <line x1="90"  y1="96" x2="90"  y2="114" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="86"  y="100" width="8" height="10" fill="#f43f5e" rx="1"/>
+    <line x1="130" y1="102" x2="130" y2="118" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="126" y="106" width="8" height="9"  fill="#f43f5e" rx="1" opacity="0.8"/>
+    <!-- BUY SIGNAL -->
+    <line x1="170" y1="108" x2="170" y2="124" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="166" y="111" width="8" height="10" fill="#f43f5e" rx="1" opacity="0.7"/>
+    <polygon points="170,140 163,152 177,152" fill="#22c55e" filter="url(#gg)"/>
+    <text x="170" y="166" text-anchor="middle" fill="#22c55e" font-size="7" font-family="IBM Plex Mono" letter-spacing="1">BUY</text>
+    <!-- Bullish candles -->
+    <line x1="210" y1="100" x2="210" y2="114" stroke="#22c55e" stroke-width="1"/>
+    <rect x="206" y="102" width="8" height="8"  fill="#22c55e" rx="1"/>
+    <line x1="250" y1="90"  x2="250" y2="104"  stroke="#22c55e" stroke-width="1"/>
+    <rect x="246" y="92"  width="8" height="9"  fill="#22c55e" rx="1"/>
+    <line x1="290" y1="82"  x2="290" y2="96"   stroke="#22c55e" stroke-width="1"/>
+    <rect x="286" y="84"  width="8" height="9"  fill="#22c55e" rx="1"/>
+    <line x1="330" y1="76"  x2="330" y2="89"   stroke="#22c55e" stroke-width="1"/>
+    <rect x="326" y="78"  width="8" height="8"  fill="#22c55e" rx="1"/>
+    <!-- Partial exit BB mid -->
+    <line x1="360" y1="70" x2="360" y2="90" stroke="#E8B84B" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>
+    <circle cx="360" cy="69" r="4" fill="none" stroke="#E8B84B" stroke-width="1.5"/>
+    <text x="360" y="62" text-anchor="middle" fill="#E8B84B" font-size="7" font-family="IBM Plex Mono">50% EXIT</text>
+    <!-- Trailing stop line -->
+    <path d="M210,118 C250,115 290,110 330,104 C345,102 355,100 360,98"
+          fill="none" stroke="#E8B84B50" stroke-width="1" stroke-dasharray="5,3"/>
+    <text x="265" y="130" text-anchor="middle" fill="#E8B84B60" font-size="7" font-family="IBM Plex Mono" letter-spacing="1">TRAILING STOP</text>
+    <!-- Bullish peak -->
+    <line x1="400" y1="66" x2="400" y2="80" stroke="#22c55e" stroke-width="1"/>
+    <rect x="396" y="68" width="8" height="8" fill="#22c55e" rx="1"/>
+    <line x1="440" y1="60" x2="440" y2="74" stroke="#22c55e" stroke-width="1"/>
+    <rect x="436" y="62" width="8" height="8" fill="#22c55e" rx="1"/>
+    <line x1="480" y1="57" x2="480" y2="72" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="476" y="58" width="8" height="10" fill="#f43f5e" rx="1" opacity="0.7"/>
+    <!-- SELL STAR SIGNAL -->
+    <line x1="520" y1="54" x2="520" y2="70" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="516" y="56" width="8" height="9" fill="#f43f5e" rx="1" opacity="0.7"/>
+    <text x="520" y="40" text-anchor="middle" fill="#fbbf24" font-size="13" filter="url(#rg)">★</text>
+    <polygon points="520,24 513,13 527,13" fill="#f43f5e" filter="url(#rg)"/>
+    <text x="520" y="9" text-anchor="middle" fill="#f43f5e" font-size="7" font-family="IBM Plex Mono" letter-spacing="1">SELL★</text>
+    <!-- Bearish drop -->
+    <line x1="560" y1="62" x2="560" y2="78" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="556" y="64" width="8" height="10" fill="#f43f5e" rx="1"/>
+    <line x1="600" y1="70" x2="600" y2="88" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="596" y="72" width="8" height="12" fill="#f43f5e" rx="1"/>
+    <line x1="640" y1="80" x2="640" y2="98" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="636" y="82" width="8" height="12" fill="#f43f5e" rx="1"/>
+    <!-- TP hit -->
+    <line x1="680" y1="22" x2="680" y2="106" stroke="#22c55e" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+    <text x="680" y="18" text-anchor="middle" fill="#22c55e" font-size="7" font-family="IBM Plex Mono" letter-spacing="1">TP HIT ✓</text>
+    <!-- SL / TP labels -->
+    <line x1="520" y1="112" x2="680" y2="112" stroke="#f43f5e50" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="760" y="115" fill="#f43f5e60" font-size="7" font-family="IBM Plex Mono">SL 1.5×ATR</text>
+    <line x1="520" y1="26"  x2="680" y2="26"  stroke="#22c55e50" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="760" y="29"  fill="#22c55e60" font-size="7" font-family="IBM Plex Mono">TP 2.5×ATR</text>
+    <!-- LWMA label -->
+    <text x="10" y="73" fill="#38bdf880" font-size="7" font-family="IBM Plex Mono">LWMA</text>
+  </svg>
+</div>
+
+<!-- ENTRY CONDITIONS -->
+<div class="sh">Entry Conditions</div>
+<div class="entry-row">
+  <div class="entry-card">
+    <div class="entry-head buy">▲&nbsp; BUY SIGNAL</div>
+    <div class="entry-body">
+      <div class="cond"><div class="dot b"></div><div><span class="clabel">Trend: </span><span class="cval">Close &gt; LWMA(20) M5 + M15 LWMA rising</span></div></div>
+      <div class="cond"><div class="dot g"></div><div><span class="clabel">Trigger: </span><span class="cval">%K crosses above %D while %K &lt; 30</span></div></div>
+      <div class="cond"><div class="dot o"></div><div><span class="clabel">Confirm: </span><span class="cval">Close ≤ BB_Lower × 1.002 &amp; RSI &lt; 35</span></div></div>
+      <div class="strong-tag">★ Confirmation = HIGH CONFIDENCE → +25% lots</div>
+    </div>
+  </div>
+  <div class="entry-card">
+    <div class="entry-head sell">▼&nbsp; SELL SIGNAL</div>
+    <div class="entry-body">
+      <div class="cond"><div class="dot b"></div><div><span class="clabel">Trend: </span><span class="cval">Close &lt; LWMA(20) M5 + M15 LWMA falling</span></div></div>
+      <div class="cond"><div class="dot r"></div><div><span class="clabel">Trigger: </span><span class="cval">%K crosses below %D while %K &gt; 70</span></div></div>
+      <div class="cond"><div class="dot o"></div><div><span class="clabel">Confirm: </span><span class="cval">Close ≥ BB_Upper × 0.998 &amp; RSI &gt; 65</span></div></div>
+      <div class="strong-tag">★ Confirmation = HIGH CONFIDENCE → +25% lots</div>
+    </div>
+  </div>
+</div>
+
+<!-- INDICATORS -->
+<div class="sh">Indicator Stack</div>
+<div class="ind-grid">
+  <div class="ind-card ib">
+    <div class="ind-name" style="color:var(--blue)">LWMA</div>
+    <div class="ind-param">Period 20 · M5 + M15</div>
+    <div class="ind-role">Linear Weighted MA — heavier weight on recent price. Dual-TF trend filter. Core of the strategy.</div>
+  </div>
+  <div class="ind-card ig">
+    <div class="ind-name" style="color:var(--gold)">STOCHASTIC</div>
+    <div class="ind-param">14 · 3 · 3 · STO_LOWHIGH</div>
+    <div class="ind-role">Primary entry trigger. Crossover from extreme zone only. Eliminates mid-range noise.</div>
+  </div>
+  <div class="ind-card it">
+    <div class="ind-name" style="color:#06b6d4">BOLL. BANDS</div>
+    <div class="ind-param">Period 20 · Deviation 2.0</div>
+    <div class="ind-role">Volatility envelope. Edge touch confirms high-confidence entries. Midline triggers partial exit.</div>
+  </div>
+  <div class="ind-card ip">
+    <div class="ind-name" style="color:var(--purple)">RSI</div>
+    <div class="ind-param">Period 14 · Levels 35/65</div>
+    <div class="ind-role">Secondary confirmation paired with BB. Paired extreme required to qualify as strength-3 signal.</div>
+  </div>
+  <div class="ind-card igr">
+    <div class="ind-name" style="color:var(--green)">ATR</div>
+    <div class="ind-param">Period 14 · All exits</div>
+    <div class="ind-role">Volatility-adaptive exits. SL=1.5×ATR, TP=2.5×ATR, trail activates at 1.0×ATR move.</div>
+  </div>
+  <div class="ind-card ir">
+    <div class="ind-name" style="color:var(--red)">MAX SPREAD</div>
+    <div class="ind-param">35 points · Hard gate</div>
+    <div class="ind-role">Spread filter blocks trading during news spikes and liquidity gaps. ECN/STP accounts recommended.</div>
+  </div>
+</div>
+
+<!-- EXITS -->
+<div class="sh">Exit System</div>
+<div class="exit-row">
+  <div class="exit-card">
+    <div class="exit-val">1.5×</div>
+    <div class="exit-unit">ATR · Stop Loss</div>
+    <div class="exit-lbl">Adapts to gold's current volatility</div>
+  </div>
+  <div class="exit-card">
+    <div class="exit-val">2.5×</div>
+    <div class="exit-unit">ATR · Take Profit</div>
+    <div class="exit-lbl">1:1.67 R/R — breaks even at 37.5% win rate</div>
+  </div>
+  <div class="exit-card">
+    <div class="exit-val">1.0×</div>
+    <div class="exit-unit">ATR activation</div>
+    <div class="exit-lbl">Trailing stop locks profit after 1×ATR move</div>
+  </div>
+  <div class="exit-card">
+    <div class="exit-val">50%</div>
+    <div class="exit-unit">at BB Midline</div>
+    <div class="exit-lbl">Partial close secures half at reversion</div>
+  </div>
+</div>
+
+<!-- RISK -->
+<div class="sh">Risk Management</div>
+<div class="risk-grid">
+  <div class="risk-cell"><div class="risk-lbl">Risk per trade</div><div class="risk-val">0.75%</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Daily DD halt</div><div class="risk-val">3.0%</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Max positions</div><div class="risk-val">2</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Consec. loss halt</div><div class="risk-val">5</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Min bars cooldown</div><div class="risk-val">5</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Max hold time</div><div class="risk-val">4H</div></div>
+</div>
+
+<!-- SESSION -->
+<div class="sh">Active Trading Window</div>
+<div class="timeline-wrap">
+  <div class="tbar">
+    <div class="tseg" style="left:0;width:33.3%;background:#0d0f18;color:var(--dim);">CLOSED</div>
+    <div class="tseg" style="left:33.3%;width:16.7%;background:rgba(56,189,248,0.18);color:var(--blue);">LONDON OPEN</div>
+    <div class="tseg" style="left:50%;width:20.8%;background:rgba(34,197,94,0.18);color:var(--green);">NY OVERLAP ★</div>
+    <div class="tseg" style="left:70.8%;width:29.2%;background:#0d0f18;color:var(--dim);">CLOSED</div>
+  </div>
+  <div class="tlabels">
+    <span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span>
+    <span>12:00</span><span>15:00</span><span>18:00</span><span>21:00</span><span>24:00</span>
+  </div>
+  <div class="tstats">
+    <div class="tstat"><div class="tstat-val">08:00</div><div class="tstat-lbl">SESSION OPEN GMT</div></div>
+    <div class="tstat"><div class="tstat-val">17:00</div><div class="tstat-lbl">SESSION CLOSE GMT</div></div>
+    <div class="tstat"><div class="tstat-val">9H</div><div class="tstat-lbl">DAILY ACTIVE WINDOW</div></div>
+    <div class="tstat"><div class="tstat-val">≤35pts</div><div class="tstat-lbl">MAX SPREAD FILTER</div></div>
+  </div>
+</div>
+
+<!-- SCIENCE -->
+<div class="sh">Academic Foundation</div>
+<div class="sci-grid">
+  <div class="sci-card">
+    <div class="sci-author">ZARITH SOFIA ET AL. · 2024</div>
+    <div class="sci-title">LWMA + Stochastic EA on XAU/USD M5</div>
+    <div class="sci-body">GA-optimized parameters. 5-year backtest 2019–2023. Only peer-reviewed study with direct XAUUSD M5 evidence. Foundation of core logic.</div>
+    <div class="sci-stat">+232% / YEAR</div>
+  </div>
+  <div class="sci-card">
+    <div class="sci-author">HUTABARAT ET AL. · 2025</div>
+    <div class="sci-title">BB + RSI on MT5 XAUUSD</div>
+    <div class="sci-body">Bollinger Bands + RSI confirmation on MT5 gold. Profit Factor 3.92 recorded. Direct basis for the confirmation layer architecture.</div>
+    <div class="sci-stat">PF 3.92</div>
+  </div>
+  <div class="sci-card">
+    <div class="sci-author">ZHANG & KHUSHI · 2020</div>
+    <div class="sci-title">Genetic Algorithm + Custom SSR Fitness</div>
+    <div class="sci-body">Sharpe-Sterling Ratio optimization criterion. Population 10, 200 generations. Basis for OnTester() optimization target.</div>
+    <div class="sci-stat">+320% AUD/USD</div>
+  </div>
+</div>
+
+</div><!-- end body -->
+
+<div class="footer">
+  <div class="footer-brand">SCALP<span style="color:#fff">GOLD</span> SNIPER EA</div>
+  XAUUSD · M5 · METATRADER 5 &nbsp;·&nbsp; BY HATEF TABBAKHIAN &nbsp;·&nbsp; MSC ECONOMICS &amp; FINANCE<br>
+  Available on MQL5 Market · Introductory price $49 · Lifetime access to future updates
+  <div style="margin-top:10px; font-size:8px; color:#1e2535;">
+    Past performance does not guarantee future results. Always test on a demo account before live deployment.
+  </div>
+</div>
+
+</body>
+</html>

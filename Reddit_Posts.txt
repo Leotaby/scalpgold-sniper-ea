@@ -1,0 +1,236 @@
+# ScalpGold Sniper EA — Reddit Post Templates
+# ─────────────────────────────────────────────────────────────────────
+# RULE: Post the body first. Wait 10 minutes. Drop the link in a COMMENT.
+# ATTACH: ScalpGold_Infographic.png screenshot to every post.
+# ─────────────────────────────────────────────────────────────────────
+
+
+══════════════════════════════════════════════════════════════════════
+  r/Forex  ·  Audience: ~900K  ·  Tone: trader-to-trader
+══════════════════════════════════════════════════════════════════════
+
+TITLE:
+Built a gold (XAUUSD) M5 scalping EA based on peer-reviewed research — here's how the logic works
+
+POST BODY:
+I've been developing an algorithmic scalping strategy for XAUUSD M5 over the past few months,
+based on a synthesis of academic papers in quantitative trading (I hold an MSc in Economics & Finance).
+
+The core idea is combining LWMA trend filtering with Stochastic crossovers from extreme zones — the
+only combo I found with direct peer-reviewed evidence on gold at M5 timeframe (+232% annual in a
+5-year backtest, Zarith Sofia et al. 2024).
+
+Strategy logic:
+• M15 LWMA slope as macro trend filter (blocks counter-trend entries)
+• M5 Stochastic(14,3,3) crossover from below 30 or above 70 only
+• Optional BB + RSI confirmation for higher-confidence entries (+25% lot)
+• ATR-adaptive SL (1.5×) and TP (2.5×) — adjusts to gold's volatility automatically
+• Trailing stop activates after 1×ATR profit, 0.75×ATR distance
+• Session filter: London open to NY close only (08:00–17:00 GMT)
+• Spread gate: max 35 points — blocks during news spikes
+
+I implemented this as a full MT5 Expert Advisor with position sizing, daily DD halts,
+and consecutive-loss pauses.
+
+Curious what experienced gold traders think — especially the M15/M5 multi-timeframe approach.
+Does anyone run similar setups on XAUUSD?
+
+[attach infographic screenshot]
+
+──────────────────────────────
+FIRST COMMENT (post 10 min later):
+For anyone who asked — I published this as a full MT5 EA here:
+https://www.mql5.com/en/market/product/168064
+$49 intro price while I collect real-account results. Happy to discuss the logic here regardless.
+
+
+══════════════════════════════════════════════════════════════════════
+  r/algotrading  ·  Audience: ~200K quants & devs  ·  Tone: technical
+══════════════════════════════════════════════════════════════════════
+
+TITLE:
+Gold scalping algorithm using LWMA trend filter + Stochastic momentum — architecture feedback welcome
+
+POST BODY:
+I built a gold (XAUUSD) scalping EA for MT5 and wanted to share the architecture for technical
+feedback. Background: MSc Economics & Finance. Built this by reviewing academic literature on
+FX/commodity scalping strategies.
+
+Peer-reviewed basis:
+— Zarith Sofia et al. (2024): LWMA+Stoch on XAUUSD M5 → 232% annual, GA-optimized, 5-year backtest
+— Hutabarat et al. (2025): BB+RSI on MT5 gold → Profit Factor 3.92
+— Zhang & Khushi (2020): Custom Sharpe-Sterling Ratio fitness function for GA optimization
+
+ENTRY ARCHITECTURE
+  Layer 1 — M15 LWMA(20) slope: macro trend gate, blocks counter-trend entries
+  Layer 2 — Stoch(14,3,3) crossover from <30 or >70: eliminates mid-range noise
+  Layer 3 — BB(20,2) band touch + RSI(14) extreme: upgrades to "strength-3" (+25% lot)
+
+EXIT SYSTEM
+  SL = 1.5×ATR(14)  ·  TP = 2.5×ATR(14)  ·  fully volatility-adaptive
+  Trail activates at 1.0×ATR profit, distance 0.75×ATR
+  Partial close: 50% at BB midline
+
+RISK CONTROLS
+  0.75% equity per trade · 3% daily DD halt · max 2 positions
+  5-loss streak halt · 08:00–17:00 GMT session · 35-pt spread gate
+
+CUSTOM OnTester() FITNESS
+  SSR = sharpe_ratio × recovery_factor × log(n_trades) × (1 − maxDD/100)
+  Adapted from Zhang & Khushi (2020) Sharpe-Sterling Ratio criterion
+  Rejects runs: trades<80, DD>25%, PF<1.1
+
+Questions I'm genuinely thinking about:
+1. Is 0.75× trailing distance too tight for XAUUSD spread fluctuation?
+2. Better approaches than ATR multipliers for gold exits specifically?
+3. Walk-forward: is 6:1 in-sample/OOS ratio adequate for M5?
+
+Full architecture writeup on GitHub (no source code — compiled EA only):
+https://github.com/Leotaby
+
+[attach infographic screenshot]
+
+──────────────────────────────
+FIRST COMMENT (post 10 min later):
+Published on MQL5 Market for anyone wanting to test parameters on demo:
+https://www.mql5.com/en/market/product/168064
+Primary goal of this post is the technical discussion though.
+
+
+══════════════════════════════════════════════════════════════════════
+  r/FOREXTRADING  ·  Audience: ~80K  ·  Tone: setups & analysis
+══════════════════════════════════════════════════════════════════════
+
+TITLE:
+XAUUSD M5 scalping setup using LWMA + Stochastic — sharing the full logic
+
+POST BODY:
+Sharing my gold scalping setup for feedback. Been working on this a while and coded it into
+a full MT5 bot. Targets XAUUSD M5 during London open and NY overlap only.
+
+▲ BUY rules:
+— Price above LWMA(20) on M5, M15 LWMA rising
+— Stoch %K crosses above %D while %K below 30
+— Optional: price at/below lower Bollinger Band + RSI below 35 → larger position
+
+▼ SELL rules (mirror):
+— Price below LWMA, M15 falling
+— %K crosses below %D while %K above 70
+— Optional: price at/above upper BB + RSI above 65 → larger position
+
+Exits: ATR-based SL and TP (auto-adjusts when gold gets volatile). Trailing stop after
+1×ATR move in your favor. 50% partial close at BB midline.
+
+The logic came from actual academic studies on gold scalping — not random indicator combos.
+Base setup has a published 5-year backtest of +232% annual on XAUUSD M5 specifically.
+
+What does your XAUUSD setup look like? Do you use multi-TF filters on gold?
+
+[attach infographic screenshot]
+
+──────────────────────────────
+FIRST COMMENT (post 10 min later):
+Also turned this into a full MT5 EA:
+https://www.mql5.com/en/market/product/168064
+Happy to answer questions about the logic here regardless.
+
+
+══════════════════════════════════════════════════════════════════════
+  r/Daytrading  ·  Audience: ~500K  ·  Tone: personal story
+══════════════════════════════════════════════════════════════════════
+
+TITLE:
+My XAUUSD M5 scalping system — built from academic research, now fully automated
+
+POST BODY:
+I spent months turning a research-based gold scalping idea into a fully automated MT5 system.
+Sharing the logic here in case it's useful.
+
+The problem: most XAUUSD M5 scalping systems over-optimize to past data or use arbitrary
+indicator settings. I wanted actual evidence.
+
+What I found: only one peer-reviewed study directly backtests XAUUSD M5 with real parameter
+optimization — Zarith Sofia et al. (2024), LWMA + Stochastic, Genetic Algorithm tuning.
+Result: 232% annual return over 5 years. That became my starting point.
+
+What I added:
+• M15 LWMA agreement required (kills most bad entries)
+• BB + RSI secondary filter for sizing up, not as hard gate
+• ATR-based dynamic SL/TP — no fixed pip values, adapts to gold's daily range
+• Session control: London + NY only, spread gate during news
+• Daily drawdown halt, consecutive loss pause, max 2 positions
+
+The automation took longer than the strategy itself — handling broker differences,
+fill modes, margin checks, partial close logic. A lot of edge cases.
+
+For anyone manually scalping gold — does multi-TF filtering improve your win rate,
+or does it miss too many good setups?
+
+[attach infographic screenshot]
+
+──────────────────────────────
+FIRST COMMENT (post 10 min later):
+Automated version is live if anyone wants to test on demo first:
+https://www.mql5.com/en/market/product/168064
+$49 intro price for first 10 buyers.
+
+
+══════════════════════════════════════════════════════════════════════
+  r/algorithmictrading  ·  Audience: ~60K  ·  Tone: deep technical
+══════════════════════════════════════════════════════════════════════
+
+TITLE:
+XAUUSD M5 scalping system — evidence-based design, ATR-adaptive exits, custom optimization
+criterion
+
+POST BODY:
+Posting to share the design philosophy and get technical feedback.
+
+I hold an MSc in Economics & Finance and reviewed quantitative trading literature before
+writing a single line of code. Most EA development starts with curve-fitting — I wanted
+to start with evidence.
+
+Strongest signal in the literature: Zarith Sofia et al. (2024) — direct XAUUSD M5 backtest,
+GA optimization of LWMA(20) + Stochastic(14,3,3). 5-year period: 232% annual, max DD <10%.
+That became the core.
+
+SYSTEM DESIGN
+
+Signal generation:
+  Layer 1 · M15 LWMA(20) slope — macro direction gate
+  Layer 2 · Stoch crossover from extreme zone — timing trigger
+  Layer 3 · BB(20,2) band touch + RSI(14) extreme — confidence upgrade (+25% lot)
+
+ATR-adaptive exits:
+  SL = 1.5×ATR(14)   TP = 2.5×ATR(14)
+  Trail activation = 1.0×ATR   Trail distance = 0.75×ATR
+  Partial exit (50%) at BB midline
+
+Custom OnTester() fitness (adapted from Zhang & Khushi 2020):
+  SSR = sharpe_ratio × recovery_factor × log(n_trades) × (1 − maxDD/100)
+  Rejects: trades<80, DD>25%, PF<1.1, profit≤0
+
+Risk controls:
+  0.75% equity · 3% daily DD halt · 5-loss streak halt
+  08:00–17:00 GMT · max 35pt spread · max 2 positions
+
+Broker-agnostic implementation:
+  Runtime filling mode detection (SYMBOL_FILLING_MODE)
+  Freeze level + stop level validation before every modification
+  Netting account detection (partial exit disabled)
+  Market-open guard (SYMBOL_TRADE_MODE check)
+
+Open questions:
+  — Is 0.75× ATR trailing distance robust or too sensitive for XAUUSD?
+  — Walk-forward: 6:1 in-sample/OOS adequate at M5 granularity?
+  — Better fitness criteria than SSR for gold specifically?
+
+Architecture writeup: https://github.com/Leotaby
+
+[attach infographic screenshot]
+
+──────────────────────────────
+FIRST COMMENT (post 10 min later):
+Published on MQL5 Market for anyone wanting to examine the parameter set on demo:
+https://www.mql5.com/en/market/product/168064
+Technical discussion is the main point here.
