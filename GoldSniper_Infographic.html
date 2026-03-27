@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Sniper MT5</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #E8B84B;
+  --gold2: #c99a2e;
+  --glow: rgba(232,184,75,0.18);
+  --bg: #060810;
+  --panel: #0b0d16;
+  --border: #13172a;
+  --green: #22c55e;
+  --red: #f43f5e;
+  --blue: #38bdf8;
+  --purple: #a78bfa;
+  --text: #bcc5e0;
+  --dim: #354060;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+  width: 900px;
+  margin: 0 auto;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  padding: 52px 48px 44px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #060810 0%, #0c0e1a 50%, #060810 100%);
+  border-bottom: 1px solid var(--border);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.hero-glow {
+  position: absolute;
+  width: 500px; height: 300px;
+  background: radial-gradient(ellipse, rgba(232,184,75,0.08), transparent 70%);
+  top: -50px; left: 50%; transform: translateX(-50%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; }
+.hero-eyebrow {
+  font-size: 10px; letter-spacing: 5px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px; line-height: 0.92;
+  letter-spacing: 3px;
+}
+.hero-title .white { color: #fff; }
+.hero-title .gold  { color: var(--gold); }
+.hero-title .dim   { color: var(--dim); font-size: 32px; letter-spacing: 8px; }
+.hero-tagline {
+  margin-top: 16px; font-size: 12px; color: var(--dim);
+  letter-spacing: 2px; line-height: 1.8;
+}
+.hero-badge {
+  position: absolute; right: 48px; top: 52px;
+  text-align: right;
+}
+.badge-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px; color: var(--gold); line-height: 1;
+  text-shadow: 0 0 30px rgba(232,184,75,0.4);
+}
+.badge-note { font-size: 9px; color: var(--dim); letter-spacing: 2px; margin-top: 2px; }
+.badge-pill {
+  display: inline-block; margin-top: 8px;
+  background: rgba(232,184,75,0.1); border: 1px solid rgba(232,184,75,0.3);
+  color: var(--gold); font-size: 9px; letter-spacing: 2px;
+  padding: 4px 10px; border-radius: 2px;
+}
+
+/* ── STATS STRIP ── */
+.stats-strip {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.stat-cell {
+  flex: 1; padding: 18px 20px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-cell.s1::before { background: var(--blue); }
+.stat-cell.s2::before { background: var(--gold); }
+.stat-cell.s3::before { background: var(--green); }
+.stat-cell.s4::before { background: var(--purple); }
+.stat-cell.s5::before { background: var(--red); }
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; line-height: 1; margin-bottom: 4px;
+}
+.stat-label { font-size: 9px; color: var(--dim); letter-spacing: 2px; }
+
+/* ── LAYOUT BODY ── */
+.body { padding: 32px 36px; }
+
+/* ── SECTION HEADER ── */
+.sh {
+  font-size: 9px; letter-spacing: 5px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.sh::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── FLOW ── */
+.flow { display:flex; align-items:stretch; gap:0; margin-bottom:36px; }
+.flow-card {
+  flex:1; background:var(--panel); border:1px solid var(--border);
+  padding:18px 14px; position:relative; overflow:hidden;
+  transition: border-color 0.2s;
+}
+.flow-card:hover { border-color: rgba(232,184,75,0.4); }
+.flow-card::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+}
+.flow-card.c1::after { background:var(--blue); }
+.flow-card.c2::after { background:var(--gold); }
+.flow-card.c3::after { background:var(--purple); }
+.flow-card.c4::after { background:var(--green); }
+.flow-num {
+  font-family:'Bebas Neue',sans-serif; font-size:42px; color:var(--border);
+  position:absolute; bottom:-4px; right:8px; line-height:1;
+}
+.flow-icon { font-size:18px; margin-bottom:8px; }
+.flow-title {
+  font-size:10px; font-weight:500; color:#fff;
+  letter-spacing:2px; text-transform:uppercase; margin-bottom:6px;
+}
+.flow-desc { font-size:10px; color:var(--dim); line-height:1.7; }
+.flow-sep {
+  width:24px; flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; color:var(--dim); font-size:12px;
+}
+
+/* ── SIGNAL ANATOMY ── */
+.anatomy { margin-bottom:36px; }
+.anatomy-wrap {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:16px; position:relative;
+}
+svg.chart { width:100%; display:block; }
+
+/* ── ENTRY GRID ── */
+.entry-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:36px; }
+.entry-card { background:var(--panel); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+.entry-head {
+  padding:10px 16px; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px;
+  display:flex; align-items:center; gap:8px;
+}
+.entry-head.buy  { background:rgba(34,197,94,0.1);  color:var(--green); border-bottom:1px solid rgba(34,197,94,0.2); }
+.entry-head.sell { background:rgba(244,63,94,0.1);  color:var(--red);   border-bottom:1px solid rgba(244,63,94,0.2); }
+.entry-body { padding:14px 16px; display:flex; flex-direction:column; gap:7px; }
+.cond {
+  display:flex; align-items:flex-start; gap:9px; font-size:10px; line-height:1.5;
+}
+.dot {
+  width:5px; height:5px; border-radius:50%; margin-top:4px; flex-shrink:0;
+}
+.dot.b { background:var(--blue);   box-shadow:0 0 5px var(--blue); }
+.dot.g { background:var(--green);  box-shadow:0 0 5px var(--green); }
+.dot.o { background:var(--gold);   box-shadow:0 0 5px var(--gold); }
+.dot.r { background:var(--red);    box-shadow:0 0 5px var(--red); }
+.clabel { color:var(--dim); }
+.cval   { color:#dde4f5; font-weight:500; }
+.strong-tag {
+  margin-top:4px; padding:5px 10px;
+  background:rgba(232,184,75,0.07); border:1px solid rgba(232,184,75,0.18);
+  color:var(--gold); font-size:9px; letter-spacing:2px; border-radius:2px;
+}
+
+/* ── INDICATORS ── */
+.ind-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:36px; }
+.ind-card {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:14px; position:relative; overflow:hidden;
+}
+.ind-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.ind-card.ib::before  { background:var(--blue); }
+.ind-card.ig::before  { background:var(--gold); }
+.ind-card.it::before  { background:#06b6d4; }
+.ind-card.ip::before  { background:var(--purple); }
+.ind-card.igr::before { background:var(--green); }
+.ind-card.ir::before  { background:var(--red); }
+.ind-name {
+  font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:2px; margin-bottom:2px;
+}
+.ind-param { font-size:9px; color:var(--gold); letter-spacing:1px; margin-bottom:8px; }
+.ind-role  { font-size:9px; color:var(--dim); line-height:1.7; }
+
+/* ── EXIT ROW ── */
+.exit-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:36px; }
+.exit-card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:4px; padding:16px 12px; text-align:center;
+}
+.exit-val {
+  font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); letter-spacing:1px;
+}
+.exit-unit { font-size:9px; color:var(--dim); letter-spacing:2px; margin-bottom:6px; }
+.exit-lbl  { font-size:9px; color:var(--text); line-height:1.5; }
+
+/* ── RISK GRID ── */
+.risk-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:36px; }
+.risk-cell {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:12px 16px; display:flex; justify-content:space-between; align-items:center;
+}
+.risk-lbl { font-size:9px; color:var(--dim); line-height:1.6; }
+.risk-val {
+  font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--gold); letter-spacing:1px;
+}
+
+/* ── TIMELINE ── */
+.timeline-wrap { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:18px 20px; margin-bottom:36px; }
+.tbar {
+  height:26px; background:#080a12; border-radius:3px; position:relative; overflow:hidden;
+  margin-bottom:6px;
+}
+.tseg {
+  position:absolute; top:0; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:8px; letter-spacing:2px; font-weight:500;
+}
+.tlabels {
+  display:flex; justify-content:space-between;
+  font-size:8px; color:var(--dim); letter-spacing:1px; margin-bottom:14px;
+}
+.tstats { display:flex; gap:8px; }
+.tstat {
+  flex:1; background:#080a12; border-radius:3px; padding:10px 12px; text-align:center;
+}
+.tstat-val { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold); }
+.tstat-lbl { font-size:8px; color:var(--dim); letter-spacing:2px; }
+
+/* ── SCIENCE ── */
+.sci-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:36px; }
+.sci-card {
+  background:var(--panel); border:1px solid var(--border); border-radius:4px;
+  padding:14px; border-left:2px solid var(--gold);
+}
+.sci-author { font-size:9px; color:var(--gold); letter-spacing:2px; margin-bottom:4px; }
+.sci-title  { font-size:10px; color:#dde4f5; font-weight:500; margin-bottom:6px; line-height:1.4; }
+.sci-body   { font-size:9px; color:var(--dim); line-height:1.7; margin-bottom:8px; }
+.sci-stat   { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--green); letter-spacing:1px; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align:center; padding:24px 36px 36px;
+  border-top:1px solid var(--border);
+  font-size:9px; color:var(--dim); letter-spacing:2px; line-height:2;
+}
+.footer-brand {
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:5px;
+  color:var(--gold); margin-bottom:6px;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">MT5 Expert Advisor · XAUUSD · H1 + M5</div>
+    <div class="hero-title">
+      <div class="gold">GOLD</div>
+      <div class="white">SNIPER</div>
+      <div class="dim">MT5</div>
+    </div>
+    <div class="hero-tagline">
+      Multi-Timeframe Trend Following &nbsp;·&nbsp; Proprietary Signal Engine<br>
+      Adaptive Trailing Exits &nbsp;·&nbsp; Quantitative Research
+    </div>
+  </div>
+  <div class="hero-badge">
+    <div class="badge-price">$49</div>
+    <div class="badge-note">INTRODUCTORY — FIRST 10 BUYERS</div>
+    <div class="badge-pill">⬆ PRICE INCREASES AFTER 10 SALES</div>
+    <div style="margin-top:10px; font-size:9px; color:var(--dim); letter-spacing:1px;">
+      MSc Economics & Finance<br>
+      Globally Ranked University
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-cell s1">
+    <div class="stat-val" style="color:var(--blue)">MULTI-TF</div>
+    <div class="stat-label">TIMEFRAME</div>
+  </div>
+  <div class="stat-cell s2">
+    <div class="stat-val" style="color:var(--gold)">XAUUSD</div>
+    <div class="stat-label">INSTRUMENT</div>
+  </div>
+  <div class="stat-cell s3">
+    <div class="stat-val" style="color:var(--green)">5-TIER</div>
+    <div class="stat-label">LOT LADDER</div>
+  </div>
+  <div class="stat-cell s4">
+    <div class="stat-val" style="color:var(--purple)">$2,689</div>
+    <div class="stat-label">NET PROFIT</div>
+  </div>
+  <div class="stat-cell s5">
+    <div class="stat-val" style="color:var(--red)">4.11%</div>
+    <div class="stat-label">BALANCE DD</div>
+  </div>
+</div>
+
+<div class="body">
+
+<!-- SIGNAL FLOW -->
+<div class="sh">Signal Generation Pipeline</div>
+<div class="flow" style="margin-bottom:36px;">
+  <div class="flow-card c1">
+    <div class="flow-num">01</div>
+    <div class="flow-icon">📡</div>
+    <div class="flow-title">Trend Analysis</div>
+    <div class="flow-desc">Proprietary multi-timeframe trend identification. Direction must be confirmed before signals are evaluated.</div>
+  </div>
+  <div class="flow-sep">›</div>
+  <div class="flow-card c2">
+    <div class="flow-num">02</div>
+    <div class="flow-icon">⚡</div>
+    <div class="flow-title">Signal Detection</div>
+    <div class="flow-desc">Multiple confirmation layers must align independently. Each acts as a gate.</div>
+  </div>
+  <div class="flow-sep">›</div>
+  <div class="flow-card c3">
+    <div class="flow-num">03</div>
+    <div class="flow-icon">🎯</div>
+    <div class="flow-title">Entry Timing</div>
+    <div class="flow-desc">Proprietary entry algorithm identifies high-probability setups within confirmed trend.</div>
+  </div>
+  <div class="flow-sep">›</div>
+  <div class="flow-card c4">
+    <div class="flow-num">04</div>
+    <div class="flow-icon">✅</div>
+    <div class="flow-title">Order Sent</div>
+    <div class="flow-desc">Position sizing calculated. Spread verified. Cooldown passed. Trade executed.</div>
+  </div>
+</div>
+
+<!-- SIGNAL ANATOMY CHART -->
+<div class="anatomy-wrap" style="margin-bottom:36px;">
+  <div style="text-align:center;padding:40px 20px;color:var(--dim);font-size:10px;letter-spacing:3px;">
+    SIGNAL ANATOMY · PROPRIETARY<br>
+    <span style="font-size:8px;margin-top:8px;display:inline-block;">Strategy visualization available to licensed users in MetaTrader 5</span>
+  </div>
+</div>
+
+<!-- ENTRY CONDITIONS -->
+<div class="sh">Entry Conditions</div>
+<div class="entry-row">
+  <div class="entry-card">
+    <div class="entry-head buy">▲&nbsp; BUY SIGNAL</div>
+    <div class="entry-body">
+      <div class="cond"><div class="dot b"></div><div><span class="clabel">Trend: </span><span class="cval">Multi-timeframe trend confirmed bullish</span></div></div>
+      <div class="cond"><div class="dot g"></div><div><span class="clabel">Signal: </span><span class="cval">Proprietary entry conditions met</span></div></div>
+      <div class="cond"><div class="dot o"></div><div><span class="clabel">Confirm: </span><span class="cval">Multiple confirmation layers aligned</span></div></div>
+      <div class="strong-tag">★ All layers confirmed → Adaptive position sizing</div>
+    </div>
+  </div>
+  <div class="entry-card">
+    <div class="entry-head sell">▼&nbsp; SELL SIGNAL</div>
+    <div class="entry-body">
+      <div class="cond"><div class="dot b"></div><div><span class="clabel">Trend: </span><span class="cval">Multi-timeframe trend confirmed bearish</span></div></div>
+      <div class="cond"><div class="dot r"></div><div><span class="clabel">Signal: </span><span class="cval">Proprietary entry conditions met</span></div></div>
+      <div class="cond"><div class="dot o"></div><div><span class="clabel">Confirm: </span><span class="cval">Multiple confirmation layers aligned</span></div></div>
+      <div class="strong-tag">★ All layers confirmed → Adaptive position sizing</div>
+    </div>
+  </div>
+</div>
+
+<!-- INDICATORS -->
+<div class="sh">Indicator Stack</div>
+<div class="ind-grid">
+  <div class="ind-card ib">
+    <div class="ind-name" style="color:var(--blue)">TREND FILTER</div>
+    <div class="ind-param">Multi-Timeframe · Proprietary</div>
+    <div class="ind-role">Proprietary trend identification. Determines direction across multiple timeframes.</div>
+  </div>
+  <div class="ind-card ig">
+    <div class="ind-name" style="color:var(--gold)">SIGNAL LAYER</div>
+    <div class="ind-param">Multi-Layer · Adaptive</div>
+    <div class="ind-role">Confirmation system. Multiple independent gates must align.</div>
+  </div>
+  <div class="ind-card it">
+    <div class="ind-name" style="color:#06b6d4">ENTRY MODULE</div>
+    <div class="ind-param">Proprietary · Adaptive</div>
+    <div class="ind-role">Identifies high-probability entries within confirmed trend.</div>
+  </div>
+  <div class="ind-card ip">
+    <div class="ind-name" style="color:var(--purple)">MOMENTUM</div>
+    <div class="ind-param">Confirmation · Filter</div>
+    <div class="ind-role">Momentum analysis prevents entries in choppy conditions.</div>
+  </div>
+  <div class="ind-card igr">
+    <div class="ind-name" style="color:var(--green)">VOLATILITY</div>
+    <div class="ind-param">Adaptive · Exits</div>
+    <div class="ind-role">Volatility measurement. Adaptive management system.</div>
+  </div>
+  <div class="ind-card ir">
+    <div class="ind-name" style="color:var(--red)">SPREAD GATE</div>
+    <div class="ind-param">Configurable · Hard Gate</div>
+    <div class="ind-role">Spread filter blocks trading during news spikes and liquidity gaps. ECN/STP accounts recommended.</div>
+  </div>
+</div>
+
+<!-- EXITS -->
+<div class="sh">Exit System</div>
+<div class="exit-row">
+  <div class="exit-card">
+    <div class="exit-val">ARM</div>
+    <div class="exit-unit">Trailing Arm</div>
+    <div class="exit-lbl">Activates trailing at configurable threshold</div>
+  </div>
+  <div class="exit-card">
+    <div class="exit-val">TRAIL</div>
+    <div class="exit-unit">Trail Distance</div>
+    <div class="exit-lbl">Adaptive trail from peak profit</div>
+  </div>
+  <div class="exit-card">
+    <div class="exit-val">DD%</div>
+    <div class="exit-unit">Equity Protection</div>
+    <div class="exit-lbl">Hard circuit breaker at configurable level</div>
+  </div>
+  <div class="exit-card">
+    <div class="exit-val">90s</div>
+    <div class="exit-unit">Cooldown Timer</div>
+    <div class="exit-lbl">Minimum time between entries</div>
+  </div>
+</div>
+
+<!-- RISK -->
+<div class="sh">Risk Management</div>
+<div class="risk-grid">
+  <div class="risk-cell"><div class="risk-lbl">Lot sizing</div><div class="risk-val">5-TIER</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Balance DD</div><div class="risk-val">4.11%</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Trades</div><div class="risk-val">361</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Win rate</div><div class="risk-val">81.72%</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Cooldown</div><div class="risk-val">90S</div></div>
+  <div class="risk-cell"><div class="risk-lbl">Profit</div><div class="risk-val">$2,689</div></div>
+</div>
+
+<!-- SESSION -->
+<div class="sh">Active Trading Window</div>
+<div class="timeline-wrap">
+  <div class="tbar">
+    <div class="tseg" style="left:0;width:100%;background:rgba(56,189,248,0.18);color:var(--blue);">24/5 OPERATION</div>
+  </div>
+  <div class="tlabels">
+    <span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span>
+    <span>12:00</span><span>15:00</span><span>18:00</span><span>21:00</span><span>24:00</span>
+  </div>
+  <div class="tstats">
+    <div class="tstat"><div class="tstat-val">24/5</div><div class="tstat-lbl">OPERATION</div></div>
+    <div class="tstat"><div class="tstat-val">ECN</div><div class="tstat-lbl">BROKER TYPE</div></div>
+    <div class="tstat"><div class="tstat-val">$1,500</div><div class="tstat-lbl">MIN DEPOSIT</div></div>
+    <div class="tstat"><div class="tstat-val">$49</div><div class="tstat-lbl">INTRO PRICE</div></div>
+  </div>
+</div>
+
+<!-- SCIENCE -->
+<div class="sh">Academic Foundation</div>
+<div class="sci-grid">
+  <div class="sci-card">
+    <div class="sci-author">ACADEMIC CONSENSUS · MULTIPLE STUDIES</div>
+    <div class="sci-title">Multi-Timeframe Trend Systems</div>
+    <div class="sci-body">Multi-timeframe trend analysis outperforms single-timeframe across gold and FX.</div>
+    <div class="sci-stat">VALIDATED</div>
+  </div>
+  <div class="sci-card">
+    <div class="sci-author">VEZERIS ET AL. · 2020</div>
+    <div class="sci-title">Walk-Forward Validation</div>
+    <div class="sci-body">d-Backtest PS methodology. Robust out-of-sample testing framework.</div>
+    <div class="sci-stat">6:1 RATIO</div>
+  </div>
+  <div class="sci-card">
+    <div class="sci-author">ZHANG & KHUSHI · 2020</div>
+    <div class="sci-title">Genetic Algorithm + Custom SSR Fitness</div>
+    <div class="sci-body">Sharpe-Sterling Ratio optimization criterion. Population 10, 200 generations. Basis for OnTester() optimization target.</div>
+    <div class="sci-stat">OPTIMIZED</div>
+  </div>
+</div>
+
+</div><!-- end body -->
+
+<div class="footer">
+  <div class="footer-brand">GOLD<span style="color:#fff">SNIPER</span> MT5</div>
+  XAUUSD · MULTI-TF · METATRADER 5 &nbsp;·&nbsp; BY HATEF TABBAKHIAN &nbsp;·&nbsp; MSC ECONOMICS &amp; FINANCE<br>
+  Available on MQL5 Market · Introductory price $49 · Lifetime access to future updates
+  <div style="margin-top:10px; font-size:8px; color:#1e2535;">
+    Past performance does not guarantee future results. Always test on a demo account before live deployment.
+  </div>
+</div>
+
+</body>
+</html>
